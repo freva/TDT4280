@@ -1,5 +1,7 @@
 package Exercise1;
 
+import Exercise1.Strategy.*;
+
 import java.util.ArrayList;
 
 public class Tournament {
@@ -7,12 +9,13 @@ public class Tournament {
 
 
     public static void main(String[] args) {
-        int numberOfRounds = Integer.parseInt(args[0]);
+        int numberOfRounds = 10;//Integer.parseInt(args[0]);
 
         players.add(new AlwaysCooperate("Always Cooperate"));
         players.add(new AlwaysDefect("Always Defect"));
         players.add(new TitForTat("TIT-for-TAT"));
         players.add(new TitForEveryOtherTat("TIT-for-every-other-TAT"));
+        players.add(new Mixture("Mixture"));
 
 
         for(int i=0; i<players.size()-1; i++) {
