@@ -5,8 +5,8 @@ import Exercise1.Player;
 import java.util.List;
 
 public class AlwaysDefect extends Player {
-    public AlwaysDefect(String s) {
-        super(s);
+    public AlwaysDefect() {
+        super("Always Defect");
     }
 
 

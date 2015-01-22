@@ -6,8 +6,8 @@ import Exercise1.Player;
 import java.util.List;
 
 public class AlwaysCooperate extends Player {
-    public AlwaysCooperate(String s) {
-        super(s);
+    public AlwaysCooperate() {
+        super("Always Cooperate");
     }
 
 

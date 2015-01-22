@@ -5,15 +5,16 @@ import java.util.ArrayList;
 
 public class Tournament {
     private static ArrayList<Player> players = new ArrayList<Player>();
-    private static final int numberOfRounds = 10;
+    private static final int numberOfRounds = 100;
 
 
     public static void main(String[] args) {
-        players.add(new AlwaysCooperate("Always Cooperate"));
-        players.add(new AlwaysDefect("Always Defect"));
-        players.add(new TitForTat("TIT-for-TAT"));
-        players.add(new TitForEveryOtherTat("TIT-for-every-other-TAT"));
-        players.add(new Mixture("Mixture"));
+        players.add(new AlwaysCooperate());
+        players.add(new AlwaysDefect());
+        players.add(new TitForTat());
+        players.add(new TitForEveryOtherTat());
+        players.add(new Mixture());
+        players.add(new DynamicRandomness());
 
 
         for(int i=0; i<players.size()-1; i++) {

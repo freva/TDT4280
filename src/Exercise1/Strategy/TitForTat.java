@@ -5,8 +5,8 @@ import Exercise1.Player;
 import java.util.List;
 
 public class TitForTat extends Player {
-    public TitForTat(String s) {
-        super(s);
+    public TitForTat() {
+        super("TIT-for-TAT");
     }
 
 

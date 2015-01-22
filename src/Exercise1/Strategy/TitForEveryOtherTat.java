@@ -5,8 +5,8 @@ import Exercise1.Player;
 import java.util.List;
 
 public class TitForEveryOtherTat extends Player {
-    public TitForEveryOtherTat(String s) {
-        super(s);
+    public TitForEveryOtherTat() {
+        super("TIT-for-every-other-TAT");
     }
 
 

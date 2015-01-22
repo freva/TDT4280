@@ -4,8 +4,8 @@ import Exercise1.Player;
 import java.util.List;
 
 public class Mixture extends Player {
-    public Mixture(String s) {
-        super(s);
+    public Mixture() {
+        super("Mixture");
     }
 
 
