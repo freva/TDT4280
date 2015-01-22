@@ -11,6 +11,8 @@ public class DynamicRandomness extends Player {
 
     @Override
     public Action dilemma(List<Action> opponentPreviousActions) {
+        if(opponentPreviousActions.size() == 0) return Action.COOPERATE;
+
         int numCoop = 0;
         for(Action a: opponentPreviousActions)
             if(a == Action.COOPERATE)
