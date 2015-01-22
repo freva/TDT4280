@@ -1,16 +1,14 @@
 package Exercise1;
 
 import Exercise1.Strategy.*;
-
 import java.util.ArrayList;
 
 public class Tournament {
     private static ArrayList<Player> players = new ArrayList<Player>();
+    private static final int numberOfRounds = 10;
 
 
     public static void main(String[] args) {
-        int numberOfRounds = 10;//Integer.parseInt(args[0]);
-
         players.add(new AlwaysCooperate("Always Cooperate"));
         players.add(new AlwaysDefect("Always Defect"));
         players.add(new TitForTat("TIT-for-TAT"));
@@ -24,8 +22,8 @@ public class Tournament {
                 Player player2 = players.get(j);
 
                 for(int k=0; k<numberOfRounds; k++) {
-                    Agent.Action player1Action = player1.getMove();
-                    Agent.Action player2Action = player2.getMove();
+                    Agent.Action player1Action = player1.dilemma(player2.getPreviousActions());
+                    Agent.Action player2Action = player2.dilemma(player1.getPreviousActions());
 
                     player1.registerMove(player1Action, player2Action);
                     player2.registerMove(player2Action, player1Action);

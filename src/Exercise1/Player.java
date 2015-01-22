@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public abstract class Player implements Agent {
     private ArrayList<Action> prevActions = new ArrayList<Action>();
     private String name;
-    private int mScore, games;
+    private int mScore, numGames, numOpponents;
     private float totScore;
 
     public Player(String name) {
@@ -16,14 +16,15 @@ public abstract class Player implements Agent {
     public void registerMove(Action myMove, Action otherMove) {
         prevActions.add(myMove);
         mScore += getScore(myMove, otherMove);
-        games++;
+        numGames++;
     }
 
 
     public void finishRound() {
-        totScore += mScore/games;
+        totScore += mScore/ numGames;
+        numOpponents++;
         mScore = 0;
-        games = 0;
+        numGames = 0;
     }
 
 
@@ -40,13 +41,12 @@ public abstract class Player implements Agent {
     }
 
 
-    public Action getMove() {
-        return dilemma(prevActions);
+    public ArrayList<Action> getPreviousActions() {
+        return prevActions;
     }
 
-
     public float getFScore() {
-        return totScore/5;
+        return totScore/numOpponents;
     }
 
 
