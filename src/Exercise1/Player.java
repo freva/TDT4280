@@ -22,7 +22,7 @@ public abstract class Player implements Agent {
 
     public void finishRound() {
         prevActions.clear();
-        totScore += mScore/ numGames;
+        totScore += ((float) mScore)/numGames;
         numOpponents++;
         mScore = 0;
         numGames = 0;
