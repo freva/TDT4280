@@ -1,31 +1,35 @@
-package Excercise2;
+package Excercise2.parser;
 
 import java.util.ArrayList;
 
-/**
- * Created by BrageEkroll on 10.02.2015.
- */
+
 public class Node {
-    private boolean isComputable = false;
     private double value;
     private Operator operator;
     private ArrayList<Node> children = new ArrayList<Node>();
     private Node parent;
 
+
     public Node(Node parent, String value){
         this.parent = parent;
         getContent(value);
-        parent.addChild(this);
+        if(parent != null) parent.addChild(this);
     }
 
     private void getContent(String value){
-        for(Operator operator : Operator.values()){
-            if(value == operator.name()){
-                this.operator = operator;
-                break;
+        String legalOP = "+-/*";
+        if(!legalOP.contains(value)) {
+            setValue(Double.valueOf(value));
+        } else {
+            char op = value.charAt(0);
+            for (Operator operator : Operator.values()) {
+                if (op == operator.getOperator()){
+                    this.operator = operator;
+                    return;
+                }
             }
+            throw new IllegalArgumentException("Not op");
         }
-        setValue(Double.valueOf(value));
     }
 
     public void addChild(Node child){
@@ -45,19 +49,18 @@ public class Node {
     }
 
     public boolean isComputable(){
-        return isComputable;
-    }
+        boolean computable = true;
+        for(Node child: children)
+            computable &= child.getOperator() == null;
 
-    public void setComputable(boolean isComputable){
-        this.isComputable = isComputable;
+        return computable;
     }
 
     public double getValue(){
         return value;
     }
 
-    public void setValue(double value){
+    public void setValue(double value) {
         this.value = value;
-        setComputable(true);
     }
 }
