@@ -13,15 +13,15 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
 
-public class AdditionAgent extends Agent {
+public abstract class Arithmetic extends Agent {
     private long busyUntil = 0L;
 
 
-    protected void setup() {
+    protected void setup(Operator op) {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(Operator.ADD.name());
+        sd.setType(op.name());
         sd.setName(getLocalName());
         dfd.addServices(sd);
         try {
@@ -45,9 +45,7 @@ public class AdditionAgent extends Agent {
     }
 
 
-    private double doCalculation(Node job) {
-        return job.getChildren().get(0).getValue() + job.getChildren().get(1).getValue();
-    }
+    protected abstract double doCalculation(Node job);
 
 
     class NegotiateJob extends CyclicBehaviour {

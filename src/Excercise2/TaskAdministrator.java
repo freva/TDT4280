@@ -16,7 +16,18 @@ import jade.lang.acl.MessageTemplate;
 
 public class TaskAdministrator extends jade.core.Agent {
     public static void main(String args[]) {
-        Boot.main(new String[]{"-gui", "TA:Excercise2.TaskAdministrator;AA:Excercise2.agents.AdditionAgent;AA2:Excercise2.agents.AdditionAgent"});
+        String agents = "TA:Excercise2.TaskAdministrator;" +
+                "AA:Excercise2.agents.Addition;" +
+                "AA2:Excercise2.agents.Addition" +
+                "AS:Excercise2.agents.Subtraction;" +
+                "AS2:Excercise2.agents.Subtraction;" +
+                "AD:Excercise2.agents.Division;" +
+                "AD2:Excercise2.agents.Division;" +
+                "AM:Excercise2.agents.Multiplication;" +
+                "AM2:Excercise2.agents.Multiplication";
+
+
+        Boot.main(new String[]{"-gui", agents});
 
     }
 
@@ -63,7 +74,7 @@ public class TaskAdministrator extends jade.core.Agent {
         public void action() {
             if(root.isFinished()) {
                 System.out.println("The answer to " + expression + " is " + root.getValue());
-                doDelete();
+                takeDown();
             }
 
 
