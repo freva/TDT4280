@@ -1,7 +1,5 @@
 package Excercise2.parser;
 
-import Excercise2.TaskAdministrator;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -69,7 +67,6 @@ public class Node implements Serializable {
         this.operator = null;
         this.processing = false;
         children.clear();
-        TaskAdministrator.ta.doWake();
     }
 
 
@@ -77,11 +74,21 @@ public class Node implements Serializable {
         this.processing = processing;
     }
 
+
+    public boolean isFinished() {
+        return operator == null;
+    }
+
+
     public String toString() {
-        String out = getOperator() == null ? Double.toString(getValue()) : Character.toString(getOperator().getOperator());
+        String out = "Processing: " + processing + "\n";
+        out += "Num Children: " + children.size() + "\n";
+        out += "Finished: " + isFinished() + "\n";
+        out += "Operator: " + operator + "\n";
+        out += getOperator() == null ? Double.toString(getValue()) : Character.toString(getOperator().getOperator());
 
         for(Node child: children)
             out += child.toString();
-        return out;
+        return out + "\n\n";
     }
 }

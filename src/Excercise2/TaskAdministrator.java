@@ -15,8 +15,6 @@ import jade.lang.acl.MessageTemplate;
 
 
 public class TaskAdministrator extends jade.core.Agent {
-    public static TaskAdministrator ta;
-
     public static void main(String args[]) {
         Boot.main(new String[]{"-gui", "TA:Excercise2.TaskAdministrator;AA:Excercise2.agents.AdditionAgent;AA2:Excercise2.agents.AdditionAgent"});
 
@@ -24,41 +22,13 @@ public class TaskAdministrator extends jade.core.Agent {
 
 
     protected void setup() {
-        TaskAdministrator.ta = this;
         addBehaviour(new CyclicBehaviour(this) {
             private MessageTemplate mt = MessageTemplate.MatchConversationId("GUI");
 
             public void action() {
                 ACLMessage msg = receive(mt);
-                if (msg != null) {
-                    Node tree = Parser.convertToPostfix(msg.getContent());
-                    System.out.println("Starting on: " + tree);
-
-                    while(tree.getOperator() != null || tree.isComputable()) {
-                        Node next = depthFirstComputableSearch(tree);
-                        if(next == null) {
-                            System.out.println("was here");
-                            System.exit(0);
-                        }
-                        System.out.println(next);
-
-                        DFAgentDescription template = new DFAgentDescription();
-                        ServiceDescription sd = new ServiceDescription();
-                        sd.setType(next.getOperator().name());
-                        template.addServices(sd);
-                        try {
-                            DFAgentDescription result[] = DFService.search(myAgent, template);
-                            AID sellerAgents[] = new AID[result.length];
-                            for (int i = 0; i < result.length; ++i)
-                                sellerAgents[i] = result[i].getName();
-
-                            myAgent.addBehaviour(new FirstPriceSealedBid(sellerAgents, next));
-                        } catch (FIPAException fe) {
-                            fe.printStackTrace();
-                        }
-                        //break;
-                    }
-                    System.out.println("The answer is: " + tree.getValue());
+                if(msg != null) {
+                    addBehaviour(new CalculateExpression(msg.getContent()));
                 }
             }
         });
@@ -77,5 +47,43 @@ public class TaskAdministrator extends jade.core.Agent {
         }
 
         return null;
+    }
+
+
+    class CalculateExpression extends CyclicBehaviour {
+        private Node root;
+        private String expression;
+
+        public CalculateExpression(String expression) {
+            this.root = Parser.convertToPostfix(expression);
+            this.expression = expression;
+        }
+
+        @Override
+        public void action() {
+            if(root.isFinished()) {
+                System.out.println("The answer to " + expression + " is " + root.getValue());
+                doDelete();
+            }
+
+
+            Node next = depthFirstComputableSearch(root);
+            if(next == null) return;
+
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType(next.getOperator().name());
+            template.addServices(sd);
+            try {
+                DFAgentDescription result[] = DFService.search(myAgent, template);
+                AID sellerAgents[] = new AID[result.length];
+                for (int i = 0; i < result.length; ++i)
+                    sellerAgents[i] = result[i].getName();
+
+                myAgent.addBehaviour(new FirstPriceSealedBid(sellerAgents, next));
+            } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
+        }
     }
 }

@@ -81,9 +81,7 @@ public class FirstPriceSealedBid extends Behaviour {
                     if(reply.getPerformative() == ACLMessage.INFORM) {
                         double answer = Double.parseDouble(reply.getContent());
                         toCompute.setValue(answer);
-                        System.out.println("answer to " + toCompute + " is " + answer);
                         step = 4;
-                        myAgent.doDelete();
                     }
                 } else block();
         }
