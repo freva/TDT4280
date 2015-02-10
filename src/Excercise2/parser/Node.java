@@ -81,14 +81,10 @@ public class Node implements Serializable {
 
 
     public String toString() {
-        String out = "Processing: " + processing + "\n";
-        out += "Num Children: " + children.size() + "\n";
-        out += "Finished: " + isFinished() + "\n";
-        out += "Operator: " + operator + "\n";
-        out += getOperator() == null ? Double.toString(getValue()) : Character.toString(getOperator().getOperator());
+        String out = getOperator() == null ? Double.toString(getValue()) : Character.toString(getOperator().getOperator());
 
         for(Node child: children)
-            out += child.toString();
-        return out + "\n\n";
+            out += " " + child.toString();
+        return out;
     }
 }

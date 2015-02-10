@@ -39,7 +39,7 @@ public abstract class Arithmetic extends Agent {
         int timeOnJob = 0;
 
         for(Node child: job.getChildren()) {
-            timeOnJob = (int) (Math.log10(child.getValue() + Math.random()) * 100);
+            timeOnJob += (int) (Math.log10(Math.abs(child.getValue())) + Math.random() * 100);
         }
         return Math.max(timeOnJob, (int) (busyUntil-System.currentTimeMillis()) + timeOnJob);
     }
@@ -61,7 +61,7 @@ public abstract class Arithmetic extends Agent {
 
                     ACLMessage replyMessage = message.createReply();
                     replyMessage.setPerformative(ACLMessage.PROPOSE);
-                    replyMessage.setContent("" + timeOnJob);
+                    replyMessage.setContent("L" + timeOnJob);
                     myAgent.send(replyMessage);
                 } catch (UnreadableException e) {
                     e.printStackTrace();

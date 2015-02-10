@@ -47,7 +47,7 @@ public class FirstPriceSealedBid extends Behaviour {
                 ACLMessage reply = myAgent.receive();
                 if(reply != null) {
                     if(reply.getPerformative() == ACLMessage.PROPOSE) {
-                        int proposal = Integer.parseInt(reply.getContent());
+                        int proposal = Integer.parseInt(reply.getContent().substring(1));
                         if(proposal < bestOffer) {
                             bestOffer = proposal;
                             bestAgent = reply.getSender();
@@ -80,6 +80,9 @@ public class FirstPriceSealedBid extends Behaviour {
                 if(reply != null) {
                     if(reply.getPerformative() == ACLMessage.INFORM) {
                         double answer = Double.parseDouble(reply.getContent());
+                        System.out.println(toCompute);
+                        System.out.println(answer);
+                        System.out.println();
                         toCompute.setValue(answer);
                         step = 4;
                     }

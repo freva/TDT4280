@@ -5,6 +5,7 @@ import Excercise2.parser.Parser;
 import Excercise2.parser.Node;
 import jade.Boot;
 import jade.core.AID;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -13,12 +14,14 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.util.Arrays;
+
 
 public class TaskAdministrator extends jade.core.Agent {
     public static void main(String args[]) {
         String agents = "TA:Excercise2.TaskAdministrator;" +
                 "AA:Excercise2.agents.Addition;" +
-                "AA2:Excercise2.agents.Addition" +
+                "AA2:Excercise2.agents.Addition;" +
                 "AS:Excercise2.agents.Subtraction;" +
                 "AS2:Excercise2.agents.Subtraction;" +
                 "AD:Excercise2.agents.Division;" +
@@ -61,20 +64,23 @@ public class TaskAdministrator extends jade.core.Agent {
     }
 
 
-    class CalculateExpression extends CyclicBehaviour {
+    class CalculateExpression extends Behaviour {
         private Node root;
         private String expression;
+        private boolean done = false;
 
         public CalculateExpression(String expression) {
             this.root = Parser.convertToPostfix(expression);
             this.expression = expression;
+            System.out.println(expression);
+            System.out.println(root);
         }
 
         @Override
         public void action() {
             if(root.isFinished()) {
                 System.out.println("The answer to " + expression + " is " + root.getValue());
-                takeDown();
+                done = true;
             }
 
 
@@ -91,10 +97,17 @@ public class TaskAdministrator extends jade.core.Agent {
                 for (int i = 0; i < result.length; ++i)
                     sellerAgents[i] = result[i].getName();
 
+                System.out.println(next + " " + Arrays.toString(sellerAgents));
+
                 myAgent.addBehaviour(new FirstPriceSealedBid(sellerAgents, next));
             } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
+        }
+
+        @Override
+        public boolean done() {
+            return done;
         }
     }
 }
