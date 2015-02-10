@@ -1,5 +1,7 @@
 package Excercise2.parser;
 
+import Excercise2.TaskAdministrator;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -9,6 +11,7 @@ public class Node implements Serializable {
     private Operator operator;
     private ArrayList<Node> children = new ArrayList<Node>();
     private Node parent;
+    private boolean processing = false;
 
 
     public Node(Node parent, String value){
@@ -49,8 +52,8 @@ public class Node implements Serializable {
         return parent;
     }
 
-    public boolean isComputable(){
-        boolean computable = true;
+    public boolean isComputable() {
+        boolean computable = !processing & children.size() > 0;
         for(Node child: children)
             computable &= child.getOperator() == null;
 
@@ -64,9 +67,15 @@ public class Node implements Serializable {
     public void setValue(double value) {
         this.value = value;
         this.operator = null;
+        this.processing = false;
         children.clear();
+        TaskAdministrator.ta.doWake();
     }
 
+
+    public void setProcessing(boolean processing) {
+        this.processing = processing;
+    }
 
     public String toString() {
         String out = getOperator() == null ? Double.toString(getValue()) : Character.toString(getOperator().getOperator());

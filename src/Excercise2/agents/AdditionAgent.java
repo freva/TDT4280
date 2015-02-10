@@ -57,7 +57,6 @@ public class AdditionAgent extends Agent {
             ACLMessage message = myAgent.receive(mt);
 
             if(message != null) {
-                System.out.println("Received auction offer");
                 try {
                     Node job = (Node) message.getContentObject();
                     int timeOnJob = estimateTime(job);
@@ -69,7 +68,7 @@ public class AdditionAgent extends Agent {
                 } catch (UnreadableException e) {
                     e.printStackTrace();
                 }
-            }
+            } else block();
         }
     }
 
@@ -81,25 +80,20 @@ public class AdditionAgent extends Agent {
             ACLMessage message = myAgent.receive(mt);
 
             if(message != null) {
-                System.out.println("offered the job!");
                 try {
                     Node job = (Node) message.getContentObject();
                     int timeOnJob = estimateTime(job);
-                    System.out.println("Sleeping...");
                     busyUntil = Math.max(busyUntil+timeOnJob, System.currentTimeMillis()+timeOnJob);
-                    Thread.sleep(timeOnJob);
+                    myAgent.doWait(timeOnJob);
 
                     ACLMessage replyMessage = message.createReply();
                     replyMessage.setPerformative(ACLMessage.INFORM);
                     replyMessage.setContent("" + doCalculation(job));
-                    System.out.println("Im done! Answer is: " + doCalculation(job) + " | The job was: " + job);
                     myAgent.send(replyMessage);
                 } catch (UnreadableException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-            }
+            } else block();
         }
     }
 }
