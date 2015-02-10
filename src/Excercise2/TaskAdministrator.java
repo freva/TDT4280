@@ -12,9 +12,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import sun.plugin2.message.Message;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 
 public class TaskAdministrator extends jade.core.Agent {
@@ -32,38 +32,28 @@ public class TaskAdministrator extends jade.core.Agent {
                     Node tree = Parser.convertToPostfix(msg.getContent());
 
                     while(tree.getOperator() != null) {
-                        System.out.println("Is not computable: " + tree);
+                    //    System.out.println("Is not computable: " + tree);
                         Node next = depthFirstComputableSearch(tree);
-                        Node answer = computeNext(next);
-                        if(next.getParent() != null) next.getParent().replace(next, answer);
-                        else tree = answer;
+
+                        DFAgentDescription template = new DFAgentDescription();
+                        ServiceDescription sd = new ServiceDescription();
+                        sd.setType(next.getOperator().name());
+                        template.addServices(sd);
+                        try {
+                            DFAgentDescription[] result = DFService.search(myAgent, template);
+                            AID [] sellerAgents = new AID[result.length];
+                            for (int i = 0; i < result.length; ++i)
+                                sellerAgents[i] = result[i].getName();
+
+                            myAgent.addBehaviour(new FirstPriceSealedBidAuction(sellerAgents, next));
+                        } catch (FIPAException fe) {
+                            fe.printStackTrace();
+                        }
                     }
                     System.out.println("The answer is: " + tree.getValue());
                 }
             }
         });
-    }
-
-
-    private Node computeNext(Node next) {
-        DFAgentDescription template = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType(next.getOperator().name());
-        template.addServices(sd);
-        try {
-            DFAgentDescription[] result = DFService.search(this, template);
-            AID [] sellerAgents = new AID[result.length];
-            for (int i = 0; i < result.length; ++i) {
-                sellerAgents[i] = result[i].getName();
-            }
-
-            this.addBehaviour(new FirstPriceSealedBidAuction(sellerAgents, next));
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
-
-
-        return new Node(next.getParent(), "9");
     }
 
 
@@ -83,8 +73,9 @@ public class TaskAdministrator extends jade.core.Agent {
     class FirstPriceSealedBidAuction extends Behaviour {
         private AID[] agents;
         private Node toCompute;
-        private int step = 0;
+        private int step = 0, replyCounter = 0, bestOffer = Integer.MAX_VALUE;
         private MessageTemplate mt;
+        private AID bestAgent;
 
         FirstPriceSealedBidAuction(AID[] agents, Node toCompute) {
             this.agents = agents;
@@ -93,8 +84,10 @@ public class TaskAdministrator extends jade.core.Agent {
 
         @Override
         public void action() {
+            System.out.println("Action called!");
             switch (step) {
                 case 0:
+                    System.out.println("Starting auction");
                     ACLMessage message = new ACLMessage(ACLMessage.CFP);
                     for(AID a: agents) {
                         message.addReceiver(a);
@@ -114,6 +107,53 @@ public class TaskAdministrator extends jade.core.Agent {
                     break;
 
                 case 1:
+                    ACLMessage reply = myAgent.receive(mt);
+                    if(reply != null) {
+                        if(reply.getPerformative() == ACLMessage.PROPOSE) {
+                            int proposal = Integer.parseInt(reply.getContent());
+                            if(proposal < bestOffer) {
+                                bestOffer = proposal;
+                                bestAgent = reply.getSender();
+                            }
+                        }
+                        System.out.println("Received proposal");
+
+                        if(++replyCounter >= agents.length) step = 2;
+                    }
+                    break;
+
+                case 2:
+                    System.out.println("Accepted a proposal with offer " +bestOffer + " from " + bestAgent);
+                    ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                    order.addReceiver(bestAgent);
+                    try {
+                        order.setContentObject(toCompute);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    order.setConversationId("order" + System.currentTimeMillis());
+                    order.setReplyWith("confirmation" + System.currentTimeMillis());
+                    myAgent.send(order);
+
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("order"), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    step = 3;
+                    break;
+
+                case 3:
+                    System.out.println("Waiting for reply");
+                    reply = myAgent.receive(mt);
+                    if(reply != null) {
+                        if(reply.getPerformative() == ACLMessage.INFORM) {
+                            double answer = Double.parseDouble(reply.getContent());
+                            toCompute.setValue(answer);
+
+                            System.out.println(answer);
+                            System.out.println(toCompute);
+                            System.exit(0);
+                            myAgent.doDelete();
+                        }
+                    }
             }
 
         }
