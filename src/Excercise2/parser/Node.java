@@ -1,9 +1,10 @@
 package Excercise2.parser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
-public class Node {
+public class Node implements Serializable {
     private double value;
     private Operator operator;
     private ArrayList<Node> children = new ArrayList<Node>();
@@ -34,6 +35,12 @@ public class Node {
 
     public void addChild(Node child){
         children.add(0, child);
+    }
+
+    public void replace(Node previous, Node next) {
+        int index = children.indexOf(previous);
+        children.remove(previous);
+        children.add(index, next);
     }
 
     public ArrayList<Node> getChildren(){
