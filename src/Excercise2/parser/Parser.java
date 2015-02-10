@@ -3,7 +3,7 @@ package Excercise2.parser;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
-public class InfixToPostfix {
+public class Parser {
     private static boolean isOperator(char c) {
         return c == '+'  ||  c == '-'  ||  c == '*'  ||  c == '/' || c=='(' || c==')';
     }

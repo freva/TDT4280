@@ -33,7 +33,7 @@ public class Node {
     }
 
     public void addChild(Node child){
-        children.add(child);
+        children.add(0, child);
     }
 
     public ArrayList<Node> getChildren(){
@@ -62,5 +62,14 @@ public class Node {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+
+    public String toString() {
+        String out = getOperator() == null ? Double.toString(getValue()) : Character.toString(getOperator().getOperator());
+
+        for(Node child: children)
+            out += child.toString();
+        return out;
     }
 }
