@@ -31,6 +31,7 @@ public class AdditionAgent extends Agent {
         }
 
         addBehaviour(new NegotiateJob());
+        addBehaviour(new DoJob());
     }
 
 
@@ -44,6 +45,11 @@ public class AdditionAgent extends Agent {
     }
 
 
+    private double doCalculation(Node job) {
+        return job.getChildren().get(0).getValue() + job.getChildren().get(1).getValue();
+    }
+
+
     class NegotiateJob extends CyclicBehaviour {
         @Override
         public void action() {
@@ -51,6 +57,7 @@ public class AdditionAgent extends Agent {
             ACLMessage message = myAgent.receive(mt);
 
             if(message != null) {
+                System.out.println("Received auction offer");
                 try {
                     Node job = (Node) message.getContentObject();
                     int timeOnJob = estimateTime(job);
@@ -60,6 +67,36 @@ public class AdditionAgent extends Agent {
                     replyMessage.setContent("" + timeOnJob);
                     myAgent.send(replyMessage);
                 } catch (UnreadableException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    class DoJob extends CyclicBehaviour {
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+            ACLMessage message = myAgent.receive(mt);
+
+            if(message != null) {
+                System.out.println("offered the job!");
+                try {
+                    Node job = (Node) message.getContentObject();
+                    int timeOnJob = estimateTime(job);
+                    System.out.println("Sleeping...");
+                    busyUntil = Math.max(busyUntil+timeOnJob, System.currentTimeMillis()+timeOnJob);
+                    Thread.sleep(timeOnJob);
+
+                    ACLMessage replyMessage = message.createReply();
+                    replyMessage.setPerformative(ACLMessage.INFORM);
+                    replyMessage.setContent("" + doCalculation(job));
+                    System.out.println("Im done! Answer is: " + doCalculation(job) + " | The job was: " + job);
+                    myAgent.send(replyMessage);
+                } catch (UnreadableException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }

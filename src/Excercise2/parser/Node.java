@@ -37,12 +37,6 @@ public class Node implements Serializable {
         children.add(0, child);
     }
 
-    public void replace(Node previous, Node next) {
-        int index = children.indexOf(previous);
-        children.remove(previous);
-        children.add(index, next);
-    }
-
     public ArrayList<Node> getChildren(){
         return children;
     }
@@ -69,6 +63,8 @@ public class Node implements Serializable {
 
     public void setValue(double value) {
         this.value = value;
+        this.operator = null;
+        children.clear();
     }
 
 
