@@ -59,6 +59,14 @@ public class FirstPriceSealedBid extends Behaviour {
                 break;
 
             case 2:
+                ACLMessage noOrder = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+                for(AID agent: agents) {
+                    if (agent != bestAgent)
+                        noOrder.addReceiver(agent);
+                }
+                noOrder.setConversationId("noOrder-" + toCompute.getOperator().name());
+                noOrder.setReplyWith("rejection" + toCompute.getOperator().name() + System.currentTimeMillis());
+
                 ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                 order.addReceiver(bestAgent);
                 try {
@@ -69,6 +77,8 @@ public class FirstPriceSealedBid extends Behaviour {
 
                 order.setConversationId("order-" + toCompute.getOperator().name());
                 order.setReplyWith("confirmation" + toCompute.getOperator().name() + System.currentTimeMillis());
+
+                myAgent.send(noOrder);
                 myAgent.send(order);
 
                 mt = MessageTemplate.and(MessageTemplate.MatchConversationId(order.getConversationId()), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
