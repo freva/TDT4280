@@ -61,7 +61,7 @@ public class FirstPriceSealedBid extends Behaviour {
             case 2:
                 ACLMessage noOrder = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
                 for(AID agent: agents) {
-                    if (agent != bestAgent)
+                    if (! agent.getLocalName().equals(bestAgent.getLocalName()))
                         noOrder.addReceiver(agent);
                 }
                 noOrder.setConversationId("noOrder-" + toCompute.getOperator().name());
