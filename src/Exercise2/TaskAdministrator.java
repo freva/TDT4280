@@ -16,20 +16,6 @@ import jade.lang.acl.MessageTemplate;
 
 
 public class TaskAdministrator extends jade.core.Agent {
-    public static void main(String args[]) {
-            String agents = "TA:Exercise2.TaskAdministrator;" +
-                            "AA:Exercise2.agents.Addition;" +
-                            "AA2:Exercise2.agents.Addition;" +
-                            "AS:Exercise2.agents.Subtraction;" +
-                            "AS2:Exercise2.agents.Subtraction;" +
-                            "AD:Exercise2.agents.Division;" +
-                            "AD2:Exercise2.agents.Division;" +
-                            "AM:Exercise2.agents.Multiplication;" +
-                            "AM2:Exercise2.agents.Multiplication";
-        Boot.main(new String[]{"-gui", agents});
-    }
-    
-    
     protected void setup() {
         addBehaviour(new CyclicBehaviour(this) {
             private MessageTemplate mt = MessageTemplate.MatchConversationId("GUI");
