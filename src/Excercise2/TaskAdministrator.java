@@ -14,10 +14,22 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import java.util.Arrays;
-
 
 public class TaskAdministrator extends jade.core.Agent {
+    public static void main(String args[]) {
+            String agents = "TA:Excercise2.TaskAdministrator;" +
+                            "AA:Excercise2.agents.Addition;" +
+                            "AA2:Excercise2.agents.Addition;" +
+                            "AS:Excercise2.agents.Subtraction;" +
+                            "AS2:Excercise2.agents.Subtraction;" +
+                            "AD:Excercise2.agents.Division;" +
+                            "AD2:Excercise2.agents.Division;" +
+                            "AM:Excercise2.agents.Multiplication;" +
+                            "AM2:Excercise2.agents.Multiplication";
+        Boot.main(new String[]{"-gui", agents});
+    }
+    
+    
     protected void setup() {
         addBehaviour(new CyclicBehaviour(this) {
             private MessageTemplate mt = MessageTemplate.MatchConversationId("GUI");
