@@ -1,8 +1,8 @@
-package Excercise2;
+package Exercise2;
 
-import Excercise2.auction.FirstPriceSealedBid;
-import Excercise2.parser.Parser;
-import Excercise2.parser.Node;
+import Exercise2.auction.FirstPriceSealedBid;
+import Exercise2.parser.Parser;
+import Exercise2.parser.Node;
 import jade.Boot;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
@@ -17,15 +17,15 @@ import jade.lang.acl.MessageTemplate;
 
 public class TaskAdministrator extends jade.core.Agent {
     public static void main(String args[]) {
-            String agents = "TA:Excercise2.TaskAdministrator;" +
-                            "AA:Excercise2.agents.Addition;" +
-                            "AA2:Excercise2.agents.Addition;" +
-                            "AS:Excercise2.agents.Subtraction;" +
-                            "AS2:Excercise2.agents.Subtraction;" +
-                            "AD:Excercise2.agents.Division;" +
-                            "AD2:Excercise2.agents.Division;" +
-                            "AM:Excercise2.agents.Multiplication;" +
-                            "AM2:Excercise2.agents.Multiplication";
+            String agents = "TA:Exercise2.TaskAdministrator;" +
+                            "AA:Exercise2.agents.Addition;" +
+                            "AA2:Exercise2.agents.Addition;" +
+                            "AS:Exercise2.agents.Subtraction;" +
+                            "AS2:Exercise2.agents.Subtraction;" +
+                            "AD:Exercise2.agents.Division;" +
+                            "AD2:Exercise2.agents.Division;" +
+                            "AM:Exercise2.agents.Multiplication;" +
+                            "AM2:Exercise2.agents.Multiplication";
         Boot.main(new String[]{"-gui", agents});
     }
     

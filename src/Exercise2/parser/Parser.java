@@ -1,4 +1,4 @@
-package Excercise2.parser;
+package Exercise2.parser;
 
 import java.util.Stack;
 import java.util.StringTokenizer;

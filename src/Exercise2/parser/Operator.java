@@ -1,4 +1,4 @@
-package Excercise2.parser;
+package Exercise2.parser;
 
 public enum Operator {
     DIVIDE('/'), MULTIPLY('*'), ADD('+'), SUBTRACT('-');

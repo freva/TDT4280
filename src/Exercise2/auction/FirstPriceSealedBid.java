@@ -1,6 +1,6 @@
-package Excercise2.auction;
+package Exercise2.auction;
 
-import Excercise2.parser.Node;
+import Exercise2.parser.Node;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;

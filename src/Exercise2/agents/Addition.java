@@ -1,7 +1,7 @@
-package Excercise2.agents;
+package Exercise2.agents;
 
-import Excercise2.parser.Node;
-import Excercise2.parser.Operator;
+import Exercise2.parser.Node;
+import Exercise2.parser.Operator;
 
 
 public class Addition extends Arithmetic {
