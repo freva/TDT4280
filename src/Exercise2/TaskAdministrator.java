@@ -91,6 +91,8 @@ public class TaskAdministrator extends jade.core.Agent {
                 for (int i = 0; i < result.length; ++i)
                     sellerAgents[i] = result[i].getName();
 
+                if(sellerAgents.length == 0)
+                    throw new IllegalArgumentException("Could not find any agent that could execute " + next.getOperator().name());
                 myAgent.addBehaviour(new FirstPriceSealedBid(sellerAgents, next));
             } catch (FIPAException fe) {
                 fe.printStackTrace();
