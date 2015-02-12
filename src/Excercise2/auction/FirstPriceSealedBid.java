@@ -35,8 +35,8 @@ public class FirstPriceSealedBid extends Behaviour {
                     e.printStackTrace();
                 }
 
-                message.setConversationId("auction-start");
-                message.setReplyWith("offer" + System.currentTimeMillis());
+                message.setConversationId("auction-start-" + toCompute.getOperator().name());
+                message.setReplyWith("offer" + toCompute.getOperator().name() + System.currentTimeMillis());
                 mt = MessageTemplate.and(MessageTemplate.MatchConversationId(message.getConversationId()),
                         MessageTemplate.MatchInReplyTo(message.getReplyWith()));
                 step = 1;
@@ -44,10 +44,10 @@ public class FirstPriceSealedBid extends Behaviour {
                 break;
 
             case 1:
-                ACLMessage reply = myAgent.receive();
+                ACLMessage reply = myAgent.receive(mt);
                 if(reply != null) {
                     if(reply.getPerformative() == ACLMessage.PROPOSE) {
-                        int proposal = Integer.parseInt(reply.getContent().substring(1));
+                        int proposal = Integer.parseInt(reply.getContent());
                         if(proposal < bestOffer) {
                             bestOffer = proposal;
                             bestAgent = reply.getSender();
@@ -67,11 +67,11 @@ public class FirstPriceSealedBid extends Behaviour {
                     e.printStackTrace();
                 }
 
-                order.setConversationId("order");
-                order.setReplyWith("confirmation" + System.currentTimeMillis());
+                order.setConversationId("order-" + toCompute.getOperator().name());
+                order.setReplyWith("confirmation" + toCompute.getOperator().name() + System.currentTimeMillis());
                 myAgent.send(order);
 
-                mt = MessageTemplate.and(MessageTemplate.MatchConversationId("order"), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                mt = MessageTemplate.and(MessageTemplate.MatchConversationId(order.getConversationId()), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
                 step = 3;
                 break;
 
@@ -80,9 +80,6 @@ public class FirstPriceSealedBid extends Behaviour {
                 if(reply != null) {
                     if(reply.getPerformative() == ACLMessage.INFORM) {
                         double answer = Double.parseDouble(reply.getContent());
-                        System.out.println(toCompute);
-                        System.out.println(answer);
-                        System.out.println();
                         toCompute.setValue(answer);
                         step = 4;
                     }

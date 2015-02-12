@@ -16,7 +16,6 @@ import jade.lang.acl.UnreadableException;
 public abstract class Arithmetic extends Agent {
     private long busyUntil = 0L;
 
-
     protected void setup(Operator op) {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -61,7 +60,7 @@ public abstract class Arithmetic extends Agent {
 
                     ACLMessage replyMessage = message.createReply();
                     replyMessage.setPerformative(ACLMessage.PROPOSE);
-                    replyMessage.setContent("L" + timeOnJob);
+                    replyMessage.setContent("" + timeOnJob);
                     myAgent.send(replyMessage);
                 } catch (UnreadableException e) {
                     e.printStackTrace();

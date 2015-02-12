@@ -18,23 +18,6 @@ import java.util.Arrays;
 
 
 public class TaskAdministrator extends jade.core.Agent {
-    public static void main(String args[]) {
-        String agents = "TA:Excercise2.TaskAdministrator;" +
-                "AA:Excercise2.agents.Addition;" +
-                "AA2:Excercise2.agents.Addition;" +
-                "AS:Excercise2.agents.Subtraction;" +
-                "AS2:Excercise2.agents.Subtraction;" +
-                "AD:Excercise2.agents.Division;" +
-                "AD2:Excercise2.agents.Division;" +
-                "AM:Excercise2.agents.Multiplication;" +
-                "AM2:Excercise2.agents.Multiplication";
-
-
-        Boot.main(new String[]{"-gui", agents});
-
-    }
-
-
     protected void setup() {
         addBehaviour(new CyclicBehaviour(this) {
             private MessageTemplate mt = MessageTemplate.MatchConversationId("GUI");
@@ -72,9 +55,8 @@ public class TaskAdministrator extends jade.core.Agent {
         public CalculateExpression(String expression) {
             this.root = Parser.convertToPostfix(expression);
             this.expression = expression;
-            System.out.println(expression);
-            System.out.println(root);
         }
+
 
         @Override
         public void action() {
@@ -96,8 +78,6 @@ public class TaskAdministrator extends jade.core.Agent {
                 AID sellerAgents[] = new AID[result.length];
                 for (int i = 0; i < result.length; ++i)
                     sellerAgents[i] = result[i].getName();
-
-                System.out.println(next + " " + Arrays.toString(sellerAgents));
 
                 myAgent.addBehaviour(new FirstPriceSealedBid(sellerAgents, next));
             } catch (FIPAException fe) {
