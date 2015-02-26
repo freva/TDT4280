@@ -16,6 +16,10 @@ public class AuctionState implements Serializable {
         this.numRounds = numRounds;
     }
 
+    public AuctionState(AuctionState as, HashMap<Item, Integer> wantedItems, Bid best) {
+        this(as.getAuctionItem(), wantedItems, best, as.getNumRounds()+1);
+    }
+
     public AuctionItem getAuctionItem() {
         return ai;
     }
