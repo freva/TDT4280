@@ -9,7 +9,7 @@ public class AuctionState implements Serializable {
     private Bid bestBid;
     private int numRounds;
 
-    public AuctionState(AuctionItem ai, HashMap<Item, Integer> wantedItems, Bid bestBid, int numRounds) {
+    private AuctionState(AuctionItem ai, HashMap<Item, Integer> wantedItems, Bid bestBid, int numRounds) {
         this.ai = ai;
         this.wantedItems = wantedItems;
         this.bestBid = bestBid;
@@ -18,6 +18,10 @@ public class AuctionState implements Serializable {
 
     public AuctionState(AuctionState as, HashMap<Item, Integer> wantedItems, Bid best) {
         this(as.getAuctionItem(), wantedItems, best, as.getNumRounds()+1);
+    }
+
+    public AuctionState(AuctionItem ai, HashMap<Item, Integer> wantedItems) {
+        this(ai, wantedItems, new Bid(), 0);
     }
 
     public AuctionItem getAuctionItem() {
