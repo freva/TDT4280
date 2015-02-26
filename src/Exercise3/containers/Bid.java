@@ -3,22 +3,20 @@ package Exercise3.containers;
 import java.util.HashMap;
 
 public class Bid {
-    private AuctionItem ai;
-    private HashMap<Item, Integer> bid;
+    private HashMap<Item, Integer> items;
     private int coins;
 
-    public Bid(AuctionItem ai, HashMap<Item, Integer> bid, int coins) {
-        this.ai = ai;
-        this.bid = bid;
+    public Bid() {
+        this.items = new HashMap<Item, Integer>();
+    }
+
+    public Bid(HashMap<Item, Integer> bid, int coins) {
+        this.items = bid;
         this.coins = coins;
     }
 
-    public AuctionItem getAi() {
-        return ai;
-    }
-
-    public HashMap<Item, Integer> getBid() {
-        return bid;
+    public HashMap<Item, Integer> getItems() {
+        return items;
     }
 
     public int getCoins() {
