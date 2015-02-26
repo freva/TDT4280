@@ -1,4 +1,4 @@
-package Exercise3;
+package Exercise3.containers;
 
 import jade.core.AID;
 

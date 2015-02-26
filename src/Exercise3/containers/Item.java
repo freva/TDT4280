@@ -1,4 +1,4 @@
-package Exercise3;
+package Exercise3.containers;
 
 public enum Item {
     bronze(0, 10), iron(1, 15), steel(2, 20), silver(3, 25), gold(4, 30), platinum(5, 35), titanium(6, 40), uranium(7, 50);
