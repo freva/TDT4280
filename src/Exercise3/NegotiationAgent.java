@@ -64,6 +64,7 @@ public class NegotiationAgent extends Agent {
         public void action() {
             ACLMessage response, msg = receive();
             AuctionItem ai;
+            AuctionState as;
 
             try {
                 switch (msg.getPerformative()) {
@@ -103,11 +104,26 @@ public class NegotiationAgent extends Agent {
 
                         response.setConversationId(BID_THREAD);
                         response.setReplyWith(BID_THREAD + System.currentTimeMillis());
-                        response.setContentObject(new AuctionState(ai, getWantedItems(), new Bid()));
+                        response.setContentObject(new AuctionState(ai, getWantedItems(), new Bid(),0));
                         myAgent.send(response);
                         break;
 
                     case ACLMessage.INFORM_IF:
+                        as = (AuctionState)msg.getContentObject();
+                        int quantityNeeded = -spareQuantity(as.getAuctionItem().getItem());
+                        if(quantityNeeded > 0) {
+                            Bid bid = generateBid(as);
+                            response = new ACLMessage(ACLMessage.PROPOSE);
+                            response.setContentObject(bid);
+                        }
+                        else {
+                            response = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+                        }
+
+
+
+
+
                 }
             } catch (UnreadableException e) {
                 e.printStackTrace();
@@ -124,13 +140,35 @@ public class NegotiationAgent extends Agent {
         }
     }
 
+    private Bid generateBid(AuctionState as){
+        HashMap<Item, Integer> bid = new HashMap<Item, Integer>();
+        int numToBuy = Math.min(as.getAuctionItem().getAmount(),-spareQuantity(as.getAuctionItem().getItem()));
+        int bidValue =(int)((as.getAuctionItem().getItem().getValue()*numToBuy)*(1-Math.pow(0.769231,as.getNumRounds()+1)));
+        for(Item item : as.getWantedItems().keySet()){
+            if(spareQuantity(item)>0){
+                int nrOfWantedItems = as.getWantedItems().get(item);
+                int toBid = (int)Math.min(Math.ceil(bidValue/item.getValue()), Math.min(nrOfWantedItems, spareQuantity(item)));
+                bidValue-= toBid*item.getValue();
+                bid.put(item, toBid);
+            }
+        }
+        if(bidValue > 0){
+            return new Bid(this.getAID(), bid, Math.min(bidValue, coins));
+        }
+        return new Bid(this.getAID(), bid, 0);
+    }
+
+    private int spareQuantity(Item item){
+        return ownedResources.get(item) - wantedResources.get(item);
+    }
+
 
     private HashMap<Item, Integer> getWantedItems() {
         HashMap<Item, Integer> wantedItems = new HashMap<Item, Integer>();
 
         for(Item item: wantedItems.keySet()) {
             if(ownedResources.get(item) >= wantedItems.get(item)) continue;
-            wantedItems.put(item, ownedResources.get(item) - wantedResources.get(item));
+            wantedItems.put(item, spareQuantity(item));
         }
         return wantedItems;
     }

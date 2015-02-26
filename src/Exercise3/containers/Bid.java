@@ -3,9 +3,10 @@ package Exercise3.containers;
 import Exercise3.Exchange;
 import jade.core.AID;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class Bid {
+public class Bid implements Serializable {
     private HashMap<Item, Integer> items;
     private int coins;
     private AID bidder;
