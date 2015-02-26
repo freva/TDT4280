@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 public class Exchange extends Agent {
     private ArrayList<AuctionItem> auctionQueue = new ArrayList<AuctionItem>();
-    private boolean isRunning = false;
     private static AID exchange;
 
 
@@ -46,15 +45,11 @@ public class Exchange extends Agent {
             ACLMessage response;
 
             try {
+                if(msg == null) return;
                 switch (msg.getPerformative()) {
                     case ACLMessage.INFORM:
                         ArrayList<AuctionItem> auctionItems = (ArrayList<AuctionItem>) msg.getContentObject();
                         auctionQueue.addAll(auctionItems);
-
-                        if (!isRunning) {
-                            checkNextAuction();
-                            isRunning = true;
-                        }
                         break;
 
                     case ACLMessage.CONFIRM:
@@ -73,6 +68,11 @@ public class Exchange extends Agent {
                     case ACLMessage.AGREE:
                         checkNextAuction();
                         break;
+
+                    case ACLMessage.CFP:
+                        checkNextAuction();
+                        break;
+
                 }
             } catch (UnreadableException e) {
                 e.printStackTrace();
