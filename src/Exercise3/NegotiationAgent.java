@@ -19,7 +19,7 @@ import java.util.*;
 public class NegotiationAgent extends Agent {
     private HashMap<Item, Integer> ownedResources = new HashMap<Item, Integer>();
     private HashMap<Item, Integer> wantedResources = new HashMap<Item, Integer>();
-    private int coins = 1000;
+    private int coins = 10000;
 
     private static final String BID_THREAD = "bid-thread";
 
@@ -56,20 +56,26 @@ public class NegotiationAgent extends Agent {
             e.printStackTrace();
         }
         this.send(msg);
+
+        addBehaviour(new SaleStuff());
     }
 
 
     class SaleStuff extends Behaviour {
+        private ArrayList<Bid> bids = new ArrayList<Bid>();
+        private int nrRejected = 0, nrBidders = 0;
+        private AuctionState myAuction = null;
+
         @Override
         public void action() {
             ACLMessage response, msg = receive();
-            ArrayList<Bid> bids = new ArrayList<Bid>();
-            int nrRejected = 0, nrBidders = 0;
-            AuctionItem ai;
-            AuctionState as = null;
             Bid bid;
+            AuctionItem ai;
+            AuctionState as;
+
 
             try {
+                if(msg == null) return;
                 switch (msg.getPerformative()) {
                     case ACLMessage.QUERY_IF:
                         ai = (AuctionItem) msg.getContentObject();
@@ -99,30 +105,30 @@ public class NegotiationAgent extends Agent {
 
                         DFAgentDescription result[] = DFService.search(myAgent, template);
                         for (DFAgentDescription aResult : result) {
-                            if (aResult.getName() != myAgent.getAID()) {
+                            if (! aResult.getName().equals(myAgent.getAID())) {
                                 nrBidders++;
                                 response.addReceiver(aResult.getName());
                             }
                         }
 
+                        myAuction = new AuctionState(ai, getWantedItems());
                         response.setConversationId(BID_THREAD);
                         response.setReplyWith(BID_THREAD + System.currentTimeMillis());
-                        response.setContentObject(new AuctionState(ai, getWantedItems(), new Bid(),0));
+                        response.setContentObject(myAuction);
                         myAgent.send(response);
                         break;
 
                     case ACLMessage.INFORM_IF:
-                        as = (AuctionState)msg.getContentObject();
+                        as = (AuctionState) msg.getContentObject();
                         int quantityNeeded = -spareQuantity(as.getAuctionItem().getItem());
                         if(quantityNeeded > 0) {
                             bid = generateBid(as);
                             response = new ACLMessage(ACLMessage.PROPOSE);
                             response.setContentObject(bid);
-                        }
-                        else {
+                        } else {
                             response = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-
                         }
+
                         response.addReceiver(as.getAuctionItem().getOwner());
                         myAgent.send(response);
                         break;
@@ -134,38 +140,6 @@ public class NegotiationAgent extends Agent {
                     case ACLMessage.PROPOSE:
                         bid = (Bid) msg.getContentObject();
                         bids.add(bid);
-                        if(bids.size() + nrRejected == nrBidders){
-                            if(bids.size() < 2) {
-                                response = new ACLMessage(ACLMessage.AGREE);
-                                response.addReceiver(Exchange.getExchange());
-                                myAgent.send(response);
-                                if (bids.size() == 0) {
-                                    response = new ACLMessage(ACLMessage.INFORM);
-                                    response.addReceiver(Exchange.getExchange());
-                                    response.setContentObject(as.getAuctionItem());
-                                    myAgent.send(response);
-                                } else {
-                                    response = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-                                    response.addReceiver(bids.get(0).getBidder());
-                                    response.setContentObject(new AuctionState(as, getWantedItems(), bids.get(0)));
-                                    myAgent.send(response);
-
-                                    Item item = as.getAuctionItem().getItem();
-                                    ownedResources.put(item, ownedResources.get(item) - as.getAuctionItem().getAmount());
-                                    adjustResources(bids.get(0), 1);
-                                }
-                                return;
-                            }
-                            Collections.sort(bids);
-                            Bid bestBid = bids.get(bids.size()-1);
-                            as = new AuctionState(as, getWantedItems(), bestBid);
-                            response = new ACLMessage(ACLMessage.INFORM_IF);
-                            for(Bid newBid : bids){
-                                response.addReceiver(newBid.getBidder());
-                            }
-                            response.setContentObject(as);
-                            myAgent.send(response);
-                        }
                         break;
 
                     case ACLMessage.ACCEPT_PROPOSAL:
@@ -174,6 +148,50 @@ public class NegotiationAgent extends Agent {
                         ownedResources.put(item, ownedResources.get(item) + as.getAuctionItem().getAmount());
                         adjustResources(as.getBestBid(), -1);
                         break;
+                }
+
+                System.out.println(getLocalName() + " " + (myAuction != null));
+                if(myAuction != null) System.out.println(getLocalName() + ": " + myAuction.getAuctionItem().getOwner().equals(myAgent.getAID()) + " " + bids.size() + " " + nrRejected + " " + nrBidders);
+                if(myAuction != null && bids.size() + nrRejected == nrBidders){
+                    if(bids.size() < 2) {
+                        response = new ACLMessage(ACLMessage.AGREE);
+                        response.addReceiver(Exchange.getExchange());
+                        myAgent.send(response);
+
+                        if (bids.size() == 0) {
+                            ArrayList<AuctionItem> resaleItem = new ArrayList<AuctionItem>();
+                            resaleItem.add(myAuction.getAuctionItem());
+                            response = new ACLMessage(ACLMessage.INFORM);
+                            response.addReceiver(Exchange.getExchange());
+                            response.setContentObject(resaleItem);
+                            myAgent.send(response);
+                        } else {
+                            response = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                            response.addReceiver(bids.get(0).getBidder());
+                            response.setContentObject(new AuctionState(myAuction, getWantedItems(), bids.get(0)));
+                            myAgent.send(response);
+
+                            Item item = myAuction.getAuctionItem().getItem();
+                            ownedResources.put(item, ownedResources.get(item) - myAuction.getAuctionItem().getAmount());
+                            adjustResources(bids.get(0), 1);
+                        }
+                        myAuction = null;
+                    } else {
+                        Collections.sort(bids);
+                        Bid bestBid = bids.get(bids.size() - 1);
+                        as = new AuctionState(myAuction, getWantedItems(), bestBid);
+                        response = new ACLMessage(ACLMessage.INFORM_IF);
+
+                        for (Bid newBid : bids) {
+                            response.addReceiver(newBid.getBidder());
+                        }
+                        response.setContentObject(as);
+                        myAgent.send(response);
+                    }
+
+                    bids = new ArrayList<Bid>();
+                    nrRejected = 0;
+                    nrBidders = 0;
                 }
             } catch (UnreadableException e) {
                 e.printStackTrace();
@@ -186,7 +204,15 @@ public class NegotiationAgent extends Agent {
 
         @Override
         public boolean done() {
-            return false;
+            for(Item item: ownedResources.keySet()) {
+                if(spareQuantity(item) < 0) return false;
+            }
+
+            System.out.println(getLocalName() + ": I am done!");
+            System.out.println(getLocalName() + ": Resources owned: " + ownedResources.entrySet());
+            System.out.println(getLocalName() + ": Resources wanted: " + wantedResources.entrySet());
+
+            return true;
         }
     }
 
