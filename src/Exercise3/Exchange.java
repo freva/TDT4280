@@ -1,5 +1,6 @@
 package Exercise3;
 
+import Exercise3.containers.AuctionItem;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;

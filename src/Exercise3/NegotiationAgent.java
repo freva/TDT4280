@@ -1,6 +1,9 @@
 package Exercise3;
 
-import jade.core.AID;
+import Exercise3.containers.AuctionItem;
+import Exercise3.containers.AuctionState;
+import Exercise3.containers.Bid;
+import Exercise3.containers.Item;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
@@ -59,13 +62,13 @@ public class NegotiationAgent extends Agent {
     class SaleStuff extends Behaviour {
         @Override
         public void action() {
-            ACLMessage msg = receive();
-            ACLMessage response;
+            ACLMessage response, msg = receive();
+            AuctionItem ai;
 
             try {
                 switch (msg.getPerformative()) {
                     case ACLMessage.QUERY_IF:
-                        AuctionItem ai = (AuctionItem) msg.getContentObject();
+                        ai = (AuctionItem) msg.getContentObject();
 
                         if(ai == null) return;
                         ai.setAmount(ownedResources.get(ai.getItem()) - wantedResources.get(ai.getItem()));
@@ -82,6 +85,7 @@ public class NegotiationAgent extends Agent {
                         break;
 
                     case ACLMessage.INFORM_REF:
+                        ai = (AuctionItem) msg.getContentObject();
                         response = new ACLMessage(ACLMessage.INFORM_IF);
 
                         DFAgentDescription template = new DFAgentDescription();
@@ -99,8 +103,11 @@ public class NegotiationAgent extends Agent {
 
                         response.setConversationId(BID_THREAD);
                         response.setReplyWith(BID_THREAD + System.currentTimeMillis());
+                        response.setContentObject(new AuctionState(ai, getWantedItems(), new Bid()));
                         myAgent.send(response);
                         break;
+
+                    case ACLMessage.INFORM_IF:
                 }
             } catch (UnreadableException e) {
                 e.printStackTrace();
@@ -115,6 +122,17 @@ public class NegotiationAgent extends Agent {
         public boolean done() {
             return false;
         }
+    }
+
+
+    private HashMap<Item, Integer> getWantedItems() {
+        HashMap<Item, Integer> wantedItems = new HashMap<Item, Integer>();
+
+        for(Item item: wantedItems.keySet()) {
+            if(ownedResources.get(item) >= wantedItems.get(item)) continue;
+            wantedItems.put(item, ownedResources.get(item) - wantedResources.get(item));
+        }
+        return wantedItems;
     }
 
 
