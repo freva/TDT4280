@@ -57,7 +57,6 @@ public abstract class Arithmetic extends Agent {
                 try {
                     Node job = (Node) message.getContentObject();
                     int timeOnJob = estimateTime(job);
-
                     ACLMessage replyMessage = message.createReply();
                     replyMessage.setPerformative(ACLMessage.PROPOSE);
                     replyMessage.setContent("" + timeOnJob);
