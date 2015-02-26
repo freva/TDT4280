@@ -8,7 +8,7 @@ public class Main {
     public static final int numAgents = 3;
 
     public static void main(String[] args) {
-        String boot[] = new String[]{"-gui", "Ex:Exchange"};
+        String boot[] = new String[]{"-gui", "Ex:Exercise3.Exchange"};
 
         for(int i=0; i<numAgents; i++) {
             boot[1] += ";NG" + i + ":Exercise3.NegotiationAgent(" + i + ")";
