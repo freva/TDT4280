@@ -7,14 +7,16 @@ public class AuctionState implements Serializable {
     private AuctionItem ai;
     private HashMap<Item, Integer> wantedItems;
     private Bid bestBid;
+    private int numRounds;
 
-    public AuctionState(AuctionItem ai, HashMap<Item, Integer> wantedItems, Bid bestBid) {
+    public AuctionState(AuctionItem ai, HashMap<Item, Integer> wantedItems, Bid bestBid, int numRounds) {
         this.ai = ai;
         this.wantedItems = wantedItems;
         this.bestBid = bestBid;
+        this.numRounds = numRounds;
     }
 
-    public AuctionItem getAi() {
+    public AuctionItem getAuctionItem() {
         return ai;
     }
 
@@ -24,5 +26,9 @@ public class AuctionState implements Serializable {
 
     public Bid getBestBid() {
         return bestBid;
+    }
+
+    public int getNumRounds() {
+        return numRounds;
     }
 }
