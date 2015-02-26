@@ -150,8 +150,7 @@ public class NegotiationAgent extends Agent {
                         break;
                 }
 
-                System.out.println(getLocalName() + " " + (myAuction != null));
-                if(myAuction != null) System.out.println(getLocalName() + ": " + myAuction.getAuctionItem().getOwner().equals(myAgent.getAID()) + " " + bids.size() + " " + nrRejected + " " + nrBidders);
+
                 if(myAuction != null && bids.size() + nrRejected == nrBidders){
                     if(bids.size() < 2) {
                         response = new ACLMessage(ACLMessage.AGREE);
