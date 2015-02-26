@@ -7,14 +7,14 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 
 import java.util.HashMap;
-import java.util.Random;
 
 public class NegotiationAgent extends Agent {
-
     private HashMap<Item, Integer> ownedResources = new HashMap<Item, Integer>();
     private HashMap<Item, Integer> wantedResources = new HashMap<Item, Integer>();
+    private int coins = 1000;
 
-    protected void setup(int id) {
+    protected void setup() {
+        int id = Integer.parseInt((String) getArguments()[0]);
         setResources(id);
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -30,14 +30,14 @@ public class NegotiationAgent extends Agent {
     }
 
     private void setResources(int id){
-        Random random = new Random();
-        long currentTime = System.currentTimeMillis();
-        int bit = (int)currentTime&63;
-        for(int i = 1; i<64; i<<=1){
-            if((bit & i)>0){
-                ownedResources.put(Item.values()[i-1],random.nextInt()%1000);
-            }
+        HashMap<Item, Integer> test = new HashMap<Item, Integer>();
+        for(Item item: Item.values()) {
+            ownedResources.put(item, (int) (200 * Math.random() + 100));
+            wantedResources.put(item, (int) (Main.numAgents*100/Math.pow(2, (id + item.getId())%Main.numAgents)*Math.random())+60);
+            test.put(item, ownedResources.get(item) - wantedResources.get(item));
         }
+
+        System.out.println(getLocalName() + " wants resources: " + test.entrySet());
     }
 
 
