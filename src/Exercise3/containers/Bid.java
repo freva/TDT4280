@@ -6,9 +6,9 @@ import jade.core.AID;
 import java.io.Serializable;
 import java.util.HashMap;
 
-public class Bid implements Serializable {
+public class Bid implements Serializable, Comparable {
     private HashMap<Item, Integer> items;
-    private int coins;
+    private int coins, marketValue;
     private AID bidder;
 
     public Bid() {
@@ -20,6 +20,10 @@ public class Bid implements Serializable {
         this.items = bid;
         this.coins = coins;
         this.bidder = bidder;
+        for(Item item : bid.keySet()){
+            marketValue += item.getValue()*bid.get(item);
+        }
+        marketValue += coins;
     }
 
     public HashMap<Item, Integer> getItems() {
@@ -32,5 +36,21 @@ public class Bid implements Serializable {
 
     public AID getBidder() {
         return bidder;
+    }
+
+    public int getMarketValue(){
+        return marketValue;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if(! (o instanceof Bid)){
+            return  Integer.MIN_VALUE;
+        }
+        Bid other = (Bid) o;
+        if(this.items.keySet().size() != other.getItems().keySet().size()){
+            return this.items.keySet().size() - other.getItems().keySet().size();
+        }
+        return this.marketValue - other.marketValue;
     }
 }
