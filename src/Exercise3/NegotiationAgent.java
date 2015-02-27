@@ -38,21 +38,6 @@ public class NegotiationAgent extends Agent {
 
         resourceDeficit = Exchange.getResourceDistribution();
         System.out.println(getLocalName() + ": " + resourceDeficit.entrySet());
-        ArrayList<AuctionItem> forSale = new ArrayList<AuctionItem>();
-        for (Item item : resourceDeficit.keySet()) {
-            if (resourceDeficit.get(item) <= 0) continue;
-
-            forSale.add(new AuctionItem(this.getAID(), item, resourceDeficit.get(item)));
-        }
-
-        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-        msg.addReceiver(Exchange.getExchange());
-        try {
-            msg.setContentObject(forSale);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.send(msg);
 
         addBehaviour(new SaleStuff());
     }
@@ -75,26 +60,14 @@ public class NegotiationAgent extends Agent {
                 if(msg == null) return;
                 switch (msg.getPerformative()) {
                     case ACLMessage.QUERY_IF:
-                        ai = (AuctionItem) msg.getContentObject();
-
-                        if(ai == null) return;
-                        ai.setAmount(resourceDeficit.get(ai.getItem()));
-
-                        if(ai.getAmount() > 0) {
-                            response = new ACLMessage(ACLMessage.CONFIRM);
-                        } else {
-                            response = new ACLMessage(ACLMessage.DISCONFIRM);
-                        }
-
-                        response.setContentObject(ai);
+                        ai = getItemForSale();
+                        if(ai == null) response = new ACLMessage(ACLMessage.DISCONFIRM);
+                        else response = new ACLMessage(ACLMessage.CONFIRM);
                         response.addReceiver(Exchange.getExchange());
                         myAgent.send(response);
-                        break;
+                        if(ai == null) return;
 
-                    case ACLMessage.INFORM_REF:
-                        ai = (AuctionItem) msg.getContentObject();
                         response = new ACLMessage(ACLMessage.INFORM_IF);
-
                         for (AID trader : Exchange.getTraders()) {
                             if (! trader.equals(myAgent.getAID())) {
                                 nrBidders++;
@@ -252,5 +225,15 @@ public class NegotiationAgent extends Agent {
             wantedItems.put(item, -resourceDeficit.get(item));
         }
         return wantedItems;
+    }
+
+
+    private AuctionItem getItemForSale() {
+        for (Item item : resourceDeficit.keySet()) {
+            if (resourceDeficit.get(item) <= 0) continue;
+
+            return new AuctionItem(this.getAID(), item, resourceDeficit.get(item));
+        }
+        return null;
     }
 }
