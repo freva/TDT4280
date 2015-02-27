@@ -16,7 +16,7 @@ import java.util.Random;
 /**
  * Created by BrageEkroll on 27.02.2015.
  */
-public class ResourceManagement {
+public class ResourceManager {
 
     private static final int amountResources = 1000;
 
