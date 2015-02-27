@@ -4,6 +4,7 @@ import Exercise3.containers.AuctionItem;
 import Exercise3.containers.AuctionState;
 import Exercise3.containers.Bid;
 import Exercise3.containers.Item;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
@@ -103,16 +104,10 @@ public class NegotiationAgent extends Agent {
                         ai = (AuctionItem) msg.getContentObject();
                         response = new ACLMessage(ACLMessage.INFORM_IF);
 
-                        DFAgentDescription template = new DFAgentDescription();
-                        ServiceDescription sd = new ServiceDescription();
-                        sd.setType("Trader");
-                        template.addServices(sd);
-
-                        DFAgentDescription result[] = DFService.search(myAgent, template);
-                        for (DFAgentDescription aResult : result) {
-                            if (! aResult.getName().equals(myAgent.getAID())) {
+                        for (AID trader : Exchange.getTraders()) {
+                            if (! trader.equals(myAgent.getAID())) {
                                 nrBidders++;
-                                response.addReceiver(aResult.getName());
+                                response.addReceiver(trader);
                             }
                         }
 
@@ -207,8 +202,6 @@ public class NegotiationAgent extends Agent {
                     bids = new ArrayList<Bid>();
                 }
             } catch (UnreadableException e) {
-                e.printStackTrace();
-            } catch (FIPAException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
