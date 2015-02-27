@@ -7,7 +7,7 @@ import java.util.Random;
 
 
 public class ResourceManager {
-    private static final int amountResources = 1000;
+    private static final int amountResources = 400;
 
     public static ArrayList<HashMap<Item,Integer>> getDistributions(int nrOfAgents){
         ArrayList<ArrayList<Double>> ownedResourcesFractions = generateOwnedResources(nrOfAgents);
@@ -21,7 +21,7 @@ public class ResourceManager {
         for(int i = 0; i< nrOfAgents; i++){
             HashMap<Item, Integer> resourceDeficit = new HashMap<Item, Integer>();
             for(int j = 0; j < ownedResourcesFractions.size(); j++){
-                resourceDeficit.put(Item.values()[j],(int)(amountResources*ownedResourcesFractions.get(j).get(i) - amountResources*wantedResourcesFractions.get(j).get(i)));
+                resourceDeficit.put(Item.values()[j],(int)(nrOfAgents*amountResources*(ownedResourcesFractions.get(j).get(i) - wantedResourcesFractions.get(j).get(i))));
             }
             distributions.add(resourceDeficit);
         }
