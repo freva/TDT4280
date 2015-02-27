@@ -17,16 +17,11 @@ import java.io.IOException;
 import java.util.*;
 
 public class NegotiationAgent extends Agent {
-    private HashMap<Item, Integer> ownedResources = new HashMap<Item, Integer>();
-    private HashMap<Item, Integer> wantedResources = new HashMap<Item, Integer>();
+    private HashMap<Item, Integer> resourceDeficit = new HashMap<Item, Integer>();
     private int coins = 10000;
-
-    private static final String BID_THREAD = "bid-thread";
 
 
     protected void setup() {
-        int id = Integer.parseInt((String) getArguments()[0]);
-        setResources(id);
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -41,10 +36,10 @@ public class NegotiationAgent extends Agent {
 
 
         ArrayList<AuctionItem> forSale = new ArrayList<AuctionItem>();
-        for(Item item: ownedResources.keySet()){
-            if(ownedResources.get(item) <= wantedResources.get(item)) continue;
+        for(Item item: resourceDeficit.keySet()){
+            if(resourceDeficit.get(item) <= 0) continue;
 
-            AuctionItem ai = new AuctionItem(this.getAID(), item, ownedResources.get(item) - wantedResources.get(item));
+            AuctionItem ai = new AuctionItem(this.getAID(), item, resourceDeficit.get(item));
             forSale.add(ai);
         }
 
@@ -81,7 +76,7 @@ public class NegotiationAgent extends Agent {
                         ai = (AuctionItem) msg.getContentObject();
 
                         if(ai == null) return;
-                        ai.setAmount(ownedResources.get(ai.getItem()) - wantedResources.get(ai.getItem()));
+                        ai.setAmount(resourceDeficit.get(ai.getItem()));
 
                         if(ai.getAmount() > 0) {
                             response = new ACLMessage(ACLMessage.CONFIRM);
@@ -112,15 +107,13 @@ public class NegotiationAgent extends Agent {
                         }
 
                         myAuction = new AuctionState(ai, getWantedItems());
-                        response.setConversationId(BID_THREAD);
-                        response.setReplyWith(BID_THREAD + System.currentTimeMillis());
                         response.setContentObject(myAuction);
                         myAgent.send(response);
                         break;
 
                     case ACLMessage.INFORM_IF:
                         as = (AuctionState) msg.getContentObject();
-                        int quantityNeeded = -spareQuantity(as.getAuctionItem().getItem());
+                        int quantityNeeded = -resourceDeficit.get(as.getAuctionItem().getItem());
                         if(quantityNeeded > 0) {
                             bid = generateBid(as);
                             response = new ACLMessage(ACLMessage.PROPOSE);
@@ -145,7 +138,7 @@ public class NegotiationAgent extends Agent {
                     case ACLMessage.ACCEPT_PROPOSAL:
                         as = (AuctionState) msg.getContentObject();
                         Item item = as.getAuctionItem().getItem();
-                        ownedResources.put(item, ownedResources.get(item) + as.getAuctionItem().getAmount());
+                        resourceDeficit.put(item, resourceDeficit.get(item) + as.getAuctionItem().getAmount());
                         adjustResources(as.getBestBid(), -1);
                         break;
                 }
@@ -182,7 +175,7 @@ public class NegotiationAgent extends Agent {
                             myAgent.send(response);
 
                             Item item = myAuction.getAuctionItem().getItem();
-                            ownedResources.put(item, ownedResources.get(item) - myAuction.getAuctionItem().getAmount());
+                            resourceDeficit.put(item, resourceDeficit.get(item) - myAuction.getAuctionItem().getAmount());
                             adjustResources(bids.get(0), 1);
                         }
                         myAuction = null;
@@ -214,13 +207,11 @@ public class NegotiationAgent extends Agent {
 
         @Override
         public boolean done() {
-            for(Item item: ownedResources.keySet())
-                if(spareQuantity(item) < 0) return false;
+            for(Item item: resourceDeficit.keySet())
+                if(resourceDeficit.get(item) < 0) return false;
 
             System.out.println(getLocalName() + ": I am done!");
-            System.out.println(getLocalName() + ": Resources owned: " + ownedResources.entrySet());
-            System.out.println(getLocalName() + ": Resources wanted: " + wantedResources.entrySet());
-
+            System.out.println(getLocalName() + ": Resources deficit: " + resourceDeficit.entrySet());
             return true;
         }
     }
@@ -228,7 +219,7 @@ public class NegotiationAgent extends Agent {
 
     private void adjustResources(Bid bid, int sign){
         for(Item item : bid.getItems().keySet())
-            ownedResources.put(item, ownedResources.get(item) + sign*bid.getItems().get(item));
+            resourceDeficit.put(item, resourceDeficit.get(item) + sign*bid.getItems().get(item));
 
         coins += sign * bid.getCoins();
     }
@@ -240,9 +231,9 @@ public class NegotiationAgent extends Agent {
         int bidValue = (int) (as.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, as.getNumRounds()+1)));
 
         for(Item item: as.getWantedItems().keySet()){
-            if(spareQuantity(item) > 0){
+            if(resourceDeficit.get(item) > 0){
                 int nrOfWantedItems = as.getWantedItems().get(item);
-                int toBid = (int) Math.min(Math.ceil(bidValue/item.getValue()), Math.min(nrOfWantedItems, spareQuantity(item)));
+                int toBid = (int) Math.min(Math.ceil(bidValue/item.getValue()), Math.min(nrOfWantedItems, resourceDeficit.get(item)));
                 bidValue -= toBid * item.getValue();
                 bid.put(item, toBid);
             }
@@ -253,30 +244,13 @@ public class NegotiationAgent extends Agent {
     }
 
 
-    private int spareQuantity(Item item){
-        return ownedResources.get(item) - wantedResources.get(item);
-    }
-
-
     private HashMap<Item, Integer> getWantedItems() {
         HashMap<Item, Integer> wantedItems = new HashMap<Item, Integer>();
 
         for(Item item: wantedItems.keySet()) {
-            if(ownedResources.get(item) >= wantedItems.get(item)) continue;
-            wantedItems.put(item, spareQuantity(item));
+            if(resourceDeficit.get(item) >= 0) continue;
+            wantedItems.put(item, -resourceDeficit.get(item));
         }
         return wantedItems;
-    }
-
-
-    private void setResources(int id) {
-        HashMap<Item, Integer> test = new HashMap<Item, Integer>();
-        for(Item item: Item.values()) {
-            ownedResources.put(item, (int) (200 * Math.random() + 100));
-            wantedResources.put(item, (int) (Main.numAgents*100/Math.pow(2, (id + item.getId())%Main.numAgents)*Math.random())+60);
-            test.put(item, ownedResources.get(item) - wantedResources.get(item));
-        }
-
-        System.out.println(getLocalName() + " wants resources: " + test.entrySet());
     }
 }
