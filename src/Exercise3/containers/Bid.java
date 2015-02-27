@@ -42,6 +42,10 @@ public class Bid implements Serializable, Comparable {
         return marketValue;
     }
 
+    public String toString() {
+        return "[" + items.entrySet() + " & " + coins + " coins]";
+    }
+
     @Override
     public int compareTo(Object o) {
         if(! (o instanceof Bid)){
