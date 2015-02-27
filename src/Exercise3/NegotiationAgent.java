@@ -151,8 +151,19 @@ public class NegotiationAgent extends Agent {
                 }
 
 
-                if(myAuction != null && bids.size() + nrRejected == nrBidders){
-                    if(bids.size() < 2) {
+                if(myAuction != null && bids.size() + nrRejected == nrBidders) {
+                    boolean acceptsBid = bids.size() == 1 &&
+                    myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, myAuction.getNumRounds())) <= bids.get(0).getMarketValue();
+
+                    if(bids.size() == 1) {
+                        Bid test = bids.get(0);
+                        System.out.println("Round " + myAuction.getNumRounds() + ": " + test + " " + myAuction.getAuctionItem());
+                        System.out.println(test.getMarketValue() + " " + myAuction.getAuctionItem().getMarketValue());
+                        System.out.println((myAuction.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, myAuction.getNumRounds()+1))) +
+                                " " + myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, myAuction.getNumRounds())));
+                    }
+
+                    if(bids.size() == 0 || acceptsBid) {
                         response = new ACLMessage(ACLMessage.AGREE);
                         response.addReceiver(Exchange.getExchange());
                         myAgent.send(response);
@@ -175,22 +186,22 @@ public class NegotiationAgent extends Agent {
                             adjustResources(bids.get(0), 1);
                         }
                         myAuction = null;
+                        nrRejected = 0;
+                        nrBidders = 0;
                     } else {
                         Collections.sort(bids);
                         Bid bestBid = bids.get(bids.size() - 1);
-                        as = new AuctionState(myAuction, getWantedItems(), bestBid);
+                        myAuction = new AuctionState(myAuction, getWantedItems(), bestBid);
                         response = new ACLMessage(ACLMessage.INFORM_IF);
 
                         for (Bid newBid : bids)
                             response.addReceiver(newBid.getBidder());
 
-                        response.setContentObject(as);
+                        response.setContentObject(myAuction);
                         myAgent.send(response);
                     }
 
                     bids = new ArrayList<Bid>();
-                    nrRejected = 0;
-                    nrBidders = 0;
                 }
             } catch (UnreadableException e) {
                 e.printStackTrace();
@@ -225,8 +236,8 @@ public class NegotiationAgent extends Agent {
 
     private Bid generateBid(AuctionState as){
         HashMap<Item, Integer> bid = new HashMap<Item, Integer>();
-        int numToBuy = Math.min(as.getAuctionItem().getAmount(), -spareQuantity(as.getAuctionItem().getItem()));
-        int bidValue = (int) ((as.getAuctionItem().getItem().getValue()*numToBuy) * (1-Math.pow(0.8, as.getNumRounds()+1)));
+        //int numToBuy = Math.min(as.getAuctionItem().getAmount(), -spareQuantity(as.getAuctionItem().getItem()));
+        int bidValue = (int) (as.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, as.getNumRounds()+1)));
 
         for(Item item: as.getWantedItems().keySet()){
             if(spareQuantity(item) > 0){
