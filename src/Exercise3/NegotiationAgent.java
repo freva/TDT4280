@@ -181,9 +181,9 @@ public class NegotiationAgent extends Agent {
                         as = new AuctionState(myAuction, getWantedItems(), bestBid);
                         response = new ACLMessage(ACLMessage.INFORM_IF);
 
-                        for (Bid newBid : bids) {
+                        for (Bid newBid : bids)
                             response.addReceiver(newBid.getBidder());
-                        }
+
                         response.setContentObject(as);
                         myAgent.send(response);
                     }
@@ -203,9 +203,8 @@ public class NegotiationAgent extends Agent {
 
         @Override
         public boolean done() {
-            for(Item item: ownedResources.keySet()) {
+            for(Item item: ownedResources.keySet())
                 if(spareQuantity(item) < 0) return false;
-            }
 
             System.out.println(getLocalName() + ": I am done!");
             System.out.println(getLocalName() + ": Resources owned: " + ownedResources.entrySet());
@@ -217,17 +216,17 @@ public class NegotiationAgent extends Agent {
 
 
     private void adjustResources(Bid bid, int sign){
-        for(Item item : bid.getItems().keySet()){
+        for(Item item : bid.getItems().keySet())
             ownedResources.put(item, ownedResources.get(item) + sign*bid.getItems().get(item));
-        }
-        coins += sign*bid.getCoins();
+
+        coins += sign * bid.getCoins();
     }
 
 
     private Bid generateBid(AuctionState as){
         HashMap<Item, Integer> bid = new HashMap<Item, Integer>();
         int numToBuy = Math.min(as.getAuctionItem().getAmount(), -spareQuantity(as.getAuctionItem().getItem()));
-        int bidValue = (int)((as.getAuctionItem().getItem().getValue()*numToBuy) * (1-Math.pow(0.769231, as.getNumRounds()+1)));
+        int bidValue = (int) ((as.getAuctionItem().getItem().getValue()*numToBuy) * (1-Math.pow(0.8, as.getNumRounds()+1)));
 
         for(Item item: as.getWantedItems().keySet()){
             if(spareQuantity(item) > 0){
@@ -238,9 +237,10 @@ public class NegotiationAgent extends Agent {
             }
         }
 
-        if(bidValue <= 0) return new Bid(this.getAID(), bid, 0);
+        if (bidValue <= 0) return new Bid(this.getAID(), bid, 0);
         return new Bid(this.getAID(), bid, Math.min(bidValue, coins));
     }
+
 
     private int spareQuantity(Item item){
         return ownedResources.get(item) - wantedResources.get(item);
@@ -258,7 +258,7 @@ public class NegotiationAgent extends Agent {
     }
 
 
-    private void setResources(int id){
+    private void setResources(int id) {
         HashMap<Item, Integer> test = new HashMap<Item, Integer>();
         for(Item item: Item.values()) {
             ownedResources.put(item, (int) (200 * Math.random() + 100));
