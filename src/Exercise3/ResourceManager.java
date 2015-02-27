@@ -1,31 +1,20 @@
 package Exercise3;
 
 import Exercise3.containers.Item;
-import jade.core.AID;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
-import jade.lang.acl.ACLMessage;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-/**
- * Created by BrageEkroll on 27.02.2015.
- */
+
 public class ResourceManager {
-
     private static final int amountResources = 1000;
-
 
     public static ArrayList<HashMap<Item,Integer>> getDistributions(int nrOfAgents){
         ArrayList<ArrayList<Double>> ownedResourcesFractions = generateOwnedResources(nrOfAgents);
         ArrayList<ArrayList<Double>> wantedResourcesFractions = generateWantedResources(nrOfAgents);
         return resourceDistribution(ownedResourcesFractions, wantedResourcesFractions, nrOfAgents);
     }
+
 
     private static ArrayList<HashMap<Item, Integer>> resourceDistribution(ArrayList<ArrayList<Double>> ownedResourcesFractions, ArrayList<ArrayList<Double>> wantedResourcesFractions, int nrOfAgents){
         ArrayList<HashMap<Item, Integer>> distributions = new ArrayList<HashMap<Item, Integer>>();
