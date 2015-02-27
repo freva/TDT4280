@@ -11,7 +11,7 @@ public class Main {
         String boot[] = new String[]{"-gui", "Ex:Exercise3.Exchange(" + numAgents + ")"};
 
         for(int i=0; i<numAgents; i++) {
-            boot[1] += ";NG" + i + ":Exercise3.NegotiationAgent";
+            boot[boot.length-1] += ";NG" + i + ":Exercise3.NegotiationAgent";
         }
 
         System.out.println(Arrays.toString(boot));

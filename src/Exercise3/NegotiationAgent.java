@@ -186,7 +186,7 @@ public class NegotiationAgent extends Agent {
         HashMap<Item, Integer> bid = new HashMap<Item, Integer>();
         int numToBuy = Math.min(as.getAuctionItem().getAmount(), -resourceDeficit.get(as.getAuctionItem().getItem()));
         int bidValue = (int) (numToBuy*as.getAuctionItem().getItem().getValue() * Math.pow(1.5, as.getNumRounds())/6);
-        if(getTotalWealth() + as.getAuctionItem().getMarketValue() - bidValue < 0 || bidValue <= 0) return null;
+        if(getTotalWealth() + as.getAuctionItem().getMarketValue() - bidValue < 100 || bidValue <= 0) return null;
 
         for(Item item: as.getWantedItems().keySet()){
             if(resourceDeficit.get(item) > 0){
@@ -215,14 +215,15 @@ public class NegotiationAgent extends Agent {
 
 
     private AuctionItem getItemForSale() {
-        ArrayList<AuctionItem> forSale = new ArrayList<AuctionItem>();
+        ArrayList<Item> forSale = new ArrayList<Item>();
         for (Item item : resourceDeficit.keySet()) {
             if (resourceDeficit.get(item) <= 0) continue;
 
-            forSale.add(new AuctionItem(this.getAID(), item, resourceDeficit.get(item)));
+            forSale.add(item);
         }
         if(forSale.size() == 0) return null;
-        return forSale.get((int) (Math.random() * forSale.size()));
+        Item toSale = forSale.get((int) (Math.random() * forSale.size()));
+        return new AuctionItem(getAID(), toSale, (int) (Math.random()*resourceDeficit.get(toSale)));
     }
 
     private int getTotalWealth() {
