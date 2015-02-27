@@ -5,7 +5,7 @@ import jade.Boot;
 import java.util.Arrays;
 
 public class Main {
-    public static final int numAgents = 5;
+    public static final int numAgents = 3;
 
     public static void main(String[] args) {
         String boot[] = new String[]{"-gui", "Ex:Exercise3.Exchange(" + numAgents + ")"};

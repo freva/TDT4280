@@ -55,7 +55,7 @@ public class Exchange extends Agent {
 
 
     public static HashMap<Item, Integer> getResourceDistribution() {
-        if(resourceDistributions.size() == 1) checkNextAuction();
+        //if(resourceDistributions.size() == 1) checkNextAuction();
         return resourceDistributions.remove(0);
     }
 
