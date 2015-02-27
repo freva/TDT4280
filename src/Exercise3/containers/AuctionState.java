@@ -21,7 +21,7 @@ public class AuctionState implements Serializable {
     }
 
     public AuctionState(AuctionItem ai, HashMap<Item, Integer> wantedItems) {
-        this(ai, wantedItems, new Bid(), 0);
+        this(ai, wantedItems, new Bid(), 1);
     }
 
     public AuctionItem getAuctionItem() {
