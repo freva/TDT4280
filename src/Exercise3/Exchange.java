@@ -29,6 +29,16 @@ public class Exchange extends Agent {
     }
 
 
+    private static void checkNextAuction() {
+        AID[] traders = getTraders();
+        AID trader = traders[(int) (Math.random()*traders.length)];
+
+        ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
+        msg.addReceiver(trader);
+        myAgent.send(msg);
+    }
+
+
     public static AID getExchange() {
         return exchange;
     }
@@ -81,12 +91,7 @@ public class Exchange extends Agent {
                 case ACLMessage.DISCONFIRM:
                 case ACLMessage.AGREE:
                 case ACLMessage.CFP:
-                    AID[] traders = getTraders();
-                    AID trader = traders[(int) (Math.random()*traders.length)];
-
-                    ACLMessage response = new ACLMessage(ACLMessage.QUERY_IF);
-                    response.addReceiver(trader);
-                    myAgent.send(response);
+                    checkNextAuction();
                     break;
             }
         }
