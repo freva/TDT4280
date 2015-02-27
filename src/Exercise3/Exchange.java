@@ -23,6 +23,7 @@ public class Exchange extends Agent {
     private static AID exchange;
     private static AID[] traders;
     private static Agent myAgent;
+    private static boolean hasWinner = false;
 
 
     protected void setup() {
@@ -46,6 +47,16 @@ public class Exchange extends Agent {
 
     public static AID getExchange() {
         return exchange;
+    }
+
+
+    public static boolean hasWinner() {
+        return hasWinner;
+    }
+
+
+    public static void hasWon() {
+        hasWinner = true;
     }
 
 
