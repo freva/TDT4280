@@ -27,7 +27,15 @@ public class AuctionItem implements Serializable {
         return amount;
     }
 
+    public int getMarketValue() {
+        return item.getValue() * amount;
+    }
+
     public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    public String toString() {
+        return item + "x" + amount;
     }
 }
