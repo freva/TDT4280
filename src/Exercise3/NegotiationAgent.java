@@ -33,24 +33,34 @@ public class NegotiationAgent extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-
-
-        ArrayList<AuctionItem> forSale = new ArrayList<AuctionItem>();
-        for(Item item: resourceDeficit.keySet()){
-            if(resourceDeficit.get(item) <= 0) continue;
-
-            AuctionItem ai = new AuctionItem(this.getAID(), item, resourceDeficit.get(item));
-            forSale.add(ai);
+        while(true) {
+            ACLMessage resourceMsg = receive();
+            if (resourceMsg == null || resourceMsg.getPerformative() != ACLMessage.INFORM) {
+                continue;
+            }
+            try {
+                resourceDeficit = (HashMap<Item, Integer>) resourceMsg.getContentObject();
+            } catch (UnreadableException e) {
+                e.printStackTrace();
+            }
+            break;
         }
+            ArrayList<AuctionItem> forSale = new ArrayList<AuctionItem>();
+            for (Item item : resourceDeficit.keySet()) {
+                if (resourceDeficit.get(item) <= 0) continue;
 
-        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-        msg.addReceiver(Exchange.getExchange());
-        try {
-            msg.setContentObject(forSale);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.send(msg);
+                AuctionItem ai = new AuctionItem(this.getAID(), item, resourceDeficit.get(item));
+                forSale.add(ai);
+            }
+
+            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+            msg.addReceiver(Exchange.getExchange());
+            try {
+                msg.setContentObject(forSale);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.send(msg);
 
         addBehaviour(new SaleStuff());
     }
