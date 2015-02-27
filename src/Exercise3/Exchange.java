@@ -14,36 +14,43 @@ import jade.lang.acl.UnreadableException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class Exchange extends Agent {
-    private ArrayList<AuctionItem> auctionQueue = new ArrayList<AuctionItem>();
+    private static ArrayList<HashMap<Item, Integer>> resourceDistributions;
+    private static ArrayList<AuctionItem> auctionQueue = new ArrayList<AuctionItem>();
     private static AID exchange;
     private static AID[] traders;
     private static Agent myAgent;
-    private static final int amountResources = 1000;
 
 
     protected void setup() {
         myAgent = this;
         exchange = this.getAID();
+        resourceDistributions = ResourceManager.getDistributions(Integer.parseInt((String) getArguments()[0]));
         addBehaviour(new AuctionAdministrator());
     }
 
 
-    private void checkNextAuction() throws IOException {
+    private static void checkNextAuction() throws IOException {
         if(auctionQueue.size() == 0) return;
 
         AuctionItem ai = auctionQueue.remove((int) (auctionQueue.size()*Math.random()));
         ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
         msg.addReceiver(ai.getOwner());
         msg.setContentObject(ai);
-        this.send(msg);
+        myAgent.send(msg);
     }
 
 
     public static AID getExchange() {
         return exchange;
+    }
+
+
+    public static HashMap<Item, Integer> getResourceDistribution() {
+        return resourceDistributions.remove(0);
     }
 
 
