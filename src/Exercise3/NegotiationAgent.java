@@ -37,12 +37,12 @@ public class NegotiationAgent extends Agent {
         }
 
         resourceDeficit = Exchange.getResourceDistribution();
+        System.out.println(getLocalName() + ": " + resourceDeficit.entrySet());
         ArrayList<AuctionItem> forSale = new ArrayList<AuctionItem>();
         for (Item item : resourceDeficit.keySet()) {
             if (resourceDeficit.get(item) <= 0) continue;
 
-            AuctionItem ai = new AuctionItem(this.getAID(), item, resourceDeficit.get(item));
-            forSale.add(ai);
+            forSale.add(new AuctionItem(this.getAID(), item, resourceDeficit.get(item)));
         }
 
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -110,8 +110,9 @@ public class NegotiationAgent extends Agent {
                     case ACLMessage.INFORM_IF:
                         as = (AuctionState) msg.getContentObject();
                         int quantityNeeded = -resourceDeficit.get(as.getAuctionItem().getItem());
-                        if(quantityNeeded > 0) {
-                            bid = generateBid(as);
+                        bid = generateBid(as);
+
+                        if(quantityNeeded > 0 && bid != null) {
                             response = new ACLMessage(ACLMessage.PROPOSE);
                             response.setContentObject(bid);
                         } else {
@@ -142,14 +143,14 @@ public class NegotiationAgent extends Agent {
 
                 if(myAuction != null && bids.size() + nrRejected == nrBidders) {
                     boolean acceptsBid = bids.size() == 1 &&
-                    myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, myAuction.getNumRounds())) <= bids.get(0).getMarketValue();
+                    myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, 2*myAuction.getNumRounds())) <= bids.get(0).getMarketValue();
 
                     if(bids.size() == 1) {
                         Bid test = bids.get(0);
                         System.out.println("Round " + myAuction.getNumRounds() + ": " + test + " " + myAuction.getAuctionItem());
                         System.out.println(test.getMarketValue() + " " + myAuction.getAuctionItem().getMarketValue());
-                        System.out.println((myAuction.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, myAuction.getNumRounds()+1))) +
-                                " " + myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, myAuction.getNumRounds())));
+                        System.out.println((myAuction.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, 2*(myAuction.getNumRounds()+1)))) +
+                                " " + myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, 2*myAuction.getNumRounds())));
                     }
 
                     if(bids.size() == 0 || acceptsBid) {
@@ -201,8 +202,11 @@ public class NegotiationAgent extends Agent {
 
         @Override
         public boolean done() {
+            if(Exchange.hasWinner()) return true;
+
             for(Item item: resourceDeficit.keySet())
                 if(resourceDeficit.get(item) < 0) return false;
+            Exchange.hasWon();
 
             System.out.println(getLocalName() + ": I am done!");
             System.out.println(getLocalName() + ": Resources deficit: " + resourceDeficit.entrySet());
@@ -221,8 +225,9 @@ public class NegotiationAgent extends Agent {
 
     private Bid generateBid(AuctionState as){
         HashMap<Item, Integer> bid = new HashMap<Item, Integer>();
-        //int numToBuy = Math.min(as.getAuctionItem().getAmount(), -spareQuantity(as.getAuctionItem().getItem()));
-        int bidValue = (int) (as.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, as.getNumRounds()+1)));
+        int numToBuy = Math.min(as.getAuctionItem().getAmount(), -resourceDeficit.get(as.getAuctionItem().getItem()));
+        int bidValue = (int) (as.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, 2*(as.getNumRounds()+1))) + Math.random()/10);
+        if(numToBuy*as.getAuctionItem().getItem().getValue() < bidValue) return null;
 
         for(Item item: as.getWantedItems().keySet()){
             if(resourceDeficit.get(item) > 0){
@@ -234,14 +239,15 @@ public class NegotiationAgent extends Agent {
         }
 
         if (bidValue <= 0) return new Bid(this.getAID(), bid, 0);
-        return new Bid(this.getAID(), bid, Math.min(bidValue, coins));
+        else if(coins > bidValue) return new Bid(this.getAID(), bid, bidValue);
+        else return null;
     }
 
 
     private HashMap<Item, Integer> getWantedItems() {
         HashMap<Item, Integer> wantedItems = new HashMap<Item, Integer>();
 
-        for(Item item: wantedItems.keySet()) {
+        for(Item item: resourceDeficit.keySet()) {
             if(resourceDeficit.get(item) >= 0) continue;
             wantedItems.put(item, -resourceDeficit.get(item));
         }
