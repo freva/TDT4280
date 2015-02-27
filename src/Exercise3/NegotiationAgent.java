@@ -67,7 +67,7 @@ public class NegotiationAgent extends Agent {
                         myAgent.send(response);
                         if(ai == null) return;
 
-                        response = new ACLMessage(ACLMessage.INFORM_IF);
+                        response = new ACLMessage(ACLMessage.INFORM);
                         for (AID trader : Exchange.getTraders()) {
                             if (! trader.equals(myAgent.getAID())) {
                                 nrBidders++;
@@ -80,7 +80,7 @@ public class NegotiationAgent extends Agent {
                         myAgent.send(response);
                         break;
 
-                    case ACLMessage.INFORM_IF:
+                    case ACLMessage.INFORM:
                         as = (AuctionState) msg.getContentObject();
                         int quantityNeeded = -resourceDeficit.get(as.getAuctionItem().getItem());
                         bid = generateBid(as);
@@ -102,6 +102,7 @@ public class NegotiationAgent extends Agent {
 
                     case ACLMessage.PROPOSE:
                         bid = (Bid) msg.getContentObject();
+                        System.out.println(getLocalName() + ": Bid: " + bid + " | " + myAuction.getAuctionItem());
                         bids.add(bid);
                         break;
 
@@ -118,27 +119,12 @@ public class NegotiationAgent extends Agent {
                     boolean acceptsBid = bids.size() == 1 &&
                     myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, 2*myAuction.getNumRounds())) <= bids.get(0).getMarketValue();
 
-                    if(bids.size() == 1) {
-                        Bid test = bids.get(0);
-                        System.out.println("Round " + myAuction.getNumRounds() + ": " + test + " " + myAuction.getAuctionItem());
-                        System.out.println(test.getMarketValue() + " " + myAuction.getAuctionItem().getMarketValue());
-                        System.out.println((myAuction.getAuctionItem().getMarketValue() * (1-Math.pow(0.8, 2*(myAuction.getNumRounds()+1)))) +
-                                " " + myAuction.getAuctionItem().getMarketValue() * (0.2 + Math.pow(0.8, 2*myAuction.getNumRounds())));
-                    }
-
                     if(bids.size() == 0 || acceptsBid) {
                         response = new ACLMessage(ACLMessage.AGREE);
                         response.addReceiver(Exchange.getExchange());
                         myAgent.send(response);
 
-                        if (bids.size() == 0) {
-                            ArrayList<AuctionItem> resaleItem = new ArrayList<AuctionItem>();
-                            resaleItem.add(myAuction.getAuctionItem());
-                            response = new ACLMessage(ACLMessage.INFORM);
-                            response.addReceiver(Exchange.getExchange());
-                            response.setContentObject(resaleItem);
-                            myAgent.send(response);
-                        } else {
+                        if (acceptsBid) {
                             response = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                             response.addReceiver(bids.get(0).getBidder());
                             response.setContentObject(new AuctionState(myAuction, getWantedItems(), bids.get(0)));
@@ -155,7 +141,7 @@ public class NegotiationAgent extends Agent {
                         Collections.sort(bids);
                         Bid bestBid = bids.get(bids.size() - 1);
                         myAuction = new AuctionState(myAuction, getWantedItems(), bestBid);
-                        response = new ACLMessage(ACLMessage.INFORM_IF);
+                        response = new ACLMessage(ACLMessage.INFORM);
 
                         for (Bid newBid : bids)
                             response.addReceiver(newBid.getBidder());
