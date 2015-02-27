@@ -3,7 +3,7 @@ package Exercise3;
 import Exercise3.containers.Item;
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -29,16 +29,6 @@ public class Exchange extends Agent {
     }
 
 
-    private static void checkNextAuction() {
-        AID[] traders = getTraders();
-        AID trader = traders[(int) (Math.random()*traders.length)];
-
-        ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
-        msg.addReceiver(trader);
-        myAgent.send(msg);
-    }
-
-
     public static AID getExchange() {
         return exchange;
     }
@@ -55,7 +45,6 @@ public class Exchange extends Agent {
 
 
     public static HashMap<Item, Integer> getResourceDistribution() {
-        //if(resourceDistributions.size() == 1) checkNextAuction();
         return resourceDistributions.remove(0);
     }
 
@@ -82,7 +71,7 @@ public class Exchange extends Agent {
     }
 
 
-    private class AuctionAdministrator extends CyclicBehaviour {
+    private class AuctionAdministrator extends Behaviour {
         @Override
         public void action() {
             ACLMessage msg = receive();
@@ -92,9 +81,19 @@ public class Exchange extends Agent {
                 case ACLMessage.DISCONFIRM:
                 case ACLMessage.AGREE:
                 case ACLMessage.CFP:
-                    checkNextAuction();
+                    AID[] traders = getTraders();
+                    AID trader = traders[(int) (Math.random()*traders.length)];
+
+                    ACLMessage response = new ACLMessage(ACLMessage.QUERY_IF);
+                    response.addReceiver(trader);
+                    myAgent.send(response);
                     break;
             }
+        }
+
+        @Override
+        public boolean done() {
+            return hasWinner();
         }
     }
 }
