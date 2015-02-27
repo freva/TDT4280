@@ -1,16 +1,11 @@
 package Exercise3.containers;
 
 public enum Item {
-    BRONZE(0, 10), IRON(1, 15), STEEL(2, 20), SILVER(3, 25), GOLD(4, 30), COPPER(5, 35), PLATINUM(6, 40), TITANIUM(7, 50);
+    BRONZE(10), IRON(15), STEEL(20), SILVER(25), GOLD(30), COPPER(35), PLATINUM(40), TITANIUM(50);
 
-    private int id, value;
-    private Item(int id, int value){
-        this.id = id;
+    private int value;
+    private Item(int value){
         this.value = value;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public int getValue() {
