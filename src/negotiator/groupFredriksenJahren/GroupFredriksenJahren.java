@@ -20,10 +20,9 @@ import negotiator.utility.UtilitySpace;
  */
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
     private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<Object, BayesianOpponentModelScalable>();
-    private Bid myLastBid;
     private Bid lastBid;
     private static final double reservationValue = 0.6;
-    private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(7d/9);
+    private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(8d/9);
 
     /**
      * Please keep this constructor. This is called by genius.
@@ -78,6 +77,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		if(action instanceof Offer) {
 			lastBid = ((Offer) action).getBid();
 			updateOpponentModel(sender, lastBid);
+		} else if(action instanceof Accept) {
+			updateOpponentModel(sender, lastBid);
 		}
 	}
 
@@ -95,32 +96,12 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		}
 
 		try {
+			System.out.println("Updating " + agent + " " + model.haveSeenBefore(bid) + " " + lastBid);
 			model.updateBeliefs(bid);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-
-    /**
-     * Generates max utility bid if this is the first round, otherwise generates best acceptable bid
-     * @return the generated bid
-     */
-    private Bid generateBid() {
-        Bid bid = null;
-        if(myLastBid == null) {
-            try {
-                bid = this.utilitySpace.getMaxUtilityBid();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            bid = getBestBid();
-        }
-
-        myLastBid = bid;
-        return bid;
-    }
 
 
 	/**
@@ -140,6 +121,17 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		return sum / opponentModels.size();
 	}
 
+	private double getMinOpponentUtility(Bid bid){
+		double min = Double.MAX_VALUE;
+		for(BayesianOpponentModelScalable model : opponentModels.values()){
+			try {
+				min = Math.min(min, model.getExpectedUtility(bid));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return min;
+	}
 
     /**
      * Calculates target value for bid as function of current time
@@ -150,11 +142,11 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
     }
 
 
-    /**
-     * Generates best acceptable bid
-     * @return the generated bid
-     */
-    private Bid getBestBid() {
+	/**
+	 * Generates max utility bid if this is the first round, otherwise generates best acceptable bid
+	 * @return the generated bid
+	 */
+	private Bid generateBid() {
 		Bid maxBid = null;
 		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility();
 
@@ -163,7 +155,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		else {
 			while(bidIterator.hasNext()) {
 				Bid thisBid = bidIterator.next();
-				double thisOwnUtil = getUtility(thisBid);
+				double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
 
 				if(thisOwnUtil > minAcceptable) {
 					double thisAvgUtil = getAverageOpponentUtility(thisBid);
@@ -175,6 +167,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 				}
 			}
 
+			System.out.println(getTimeLine().getCurrentTime() + ": " + maxOwnUtil + " " + maxAvgUtil);
+			lastBid = maxBid;
 			return maxBid;
 		}
     }
