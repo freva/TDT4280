@@ -1,4 +1,4 @@
-package Exercise4.src.negotiator.groupFredriksenJahren;
+package negotiator.groupFredriksenJahren;
 
 import java.util.List;
 import java.util.Map;
