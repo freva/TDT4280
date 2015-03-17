@@ -53,6 +53,61 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
     }
 
 
+	/**
+	 * All offers proposed by the other parties will be received as a message.
+	 * You can use this information to your advantage, for example to predict their utility.
+	 *
+	 * @param sender The party that did the action.
+	 * @param action The action that party did.
+	 */
+	@Override
+	public void receiveMessage(Object sender, Action action) {
+		super.receiveMessage(sender, action);
+		if(action instanceof Offer) {
+			lastBid = ((Offer) action).getBid();
+			updateOpponentModel(sender, lastBid);
+		}
+	}
+
+
+	/**
+	 * Updates opponent model after receiving a bid
+	 * @param agent the sender of the bid
+	 * @param bid the bid
+	 */
+	private void updateOpponentModel(Object agent, Bid bid) {
+		BayesianOpponentModelScalable model = opponentModels.get(agent);
+		if(model == null){
+			model = new BayesianOpponentModelScalable(this.utilitySpace);
+			opponentModels.put(agent, model);
+		}
+
+		try {
+			model.updateBeliefs(bid);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	/**
+	 * Calculates average expected utility between the opponents based on their model
+	 * @param bid the bid to evaluate
+	 * @return average expected utility
+	 */
+	private double averageOpponentUtility(Bid bid){
+		double sum = 0;
+		for(BayesianOpponentModelScalable model : opponentModels.values()){
+			try {
+				sum += model.getExpectedUtility(bid);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return sum / (double) opponentModels.size();
+	}
+
+
     private boolean shouldAccept(){
         calculateTargetUtility();
         boolean incomingBidBetter = false;
@@ -99,7 +154,6 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
         return bid;
     }
 
-
     private Bid getBidBetterThan(double previousUtility){
         Bid bid;
         int counter = 0;
@@ -116,49 +170,4 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
         }
         return bid;
     }
-
-
-    private double averageOpponentUtility(Bid bid){
-        double sum = 0;
-        for(BayesianOpponentModelScalable model : opponentModels.values()){
-            try {
-                sum += model.getExpectedUtility(bid);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return sum / (double) opponentModels.size();
-    }
-
-
-    /**
-     * All offers proposed by the other parties will be received as a message.
-     * You can use this information to your advantage, for example to predict their utility.
-     *
-     * @param sender The party that did the action.
-     * @param action The action that party did.
-     */
-    @Override
-    public void receiveMessage(Object sender, Action action) {
-        super.receiveMessage(sender, action);
-        if(action instanceof Offer)
-            lastBid = ((Offer)action).getBid();
-
-        updateOpponentModel(sender);
-    }
-
-
-    private void updateOpponentModel(Object agent){
-        BayesianOpponentModelScalable model = opponentModels.get(agent);
-        if(model == null){
-            model = new BayesianOpponentModelScalable(this.utilitySpace);
-            opponentModels.put(agent, model);
-        }
-
-		try {
-			model.updateBeliefs(lastBid);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }
