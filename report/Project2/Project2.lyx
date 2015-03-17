@@ -126,10 +126,13 @@ generateBid()
 \begin_layout Itemize
 
 \emph on
-shouldAccept()
+shouldAccept(bid)
 \emph default
-: Returns true if agent's utility of current bid is greater than or equal
- to the value returned by 
+: Returns true if agent's utility of the 
+\emph on
+bid
+\emph default
+ is greater than or equal to the value returned by 
 \emph on
 getTargetUtility()
 \emph default
@@ -154,7 +157,7 @@ reference "fig:Target-utility-function"
 \begin_layout Itemize
 
 \emph on
-receiveMessage()
+receiveMessage(sender, action)
 \emph default
 : Receives a message from a 
 \emph on
@@ -183,7 +186,7 @@ updateOpponentModel()
 \begin_layout Itemize
 
 \emph on
-updateOpponentModel()
+updateOpponentModel(sender, action)
 \emph default
 : Updates a dictionary of 
 \emph on
@@ -217,7 +220,47 @@ getBestBid()
 \end_layout
 
 \begin_layout Itemize
-getAverageOpponentUtility(): 
+
+\emph on
+getAverageOpponentUtility(bid)
+\emph default
+: Returns the average expected utility of 
+\emph on
+bid 
+\emph default
+for all other agents.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+getBestBid()
+\emph default
+: Loops over all 
+\emph on
+bid
+\emph default
+s, first filters out all the 
+\emph on
+bid
+\emph default
+s less than the 
+\emph on
+getTargetUtility()
+\emph default
+, and returns the 
+\emph on
+bid
+\emph default
+ that produces maximum product of 
+\emph on
+getUtility(bid)
+\emph default
+ and 
+\emph on
+getAverageOpponentUtility(bid)
+\emph default
+.
 \end_layout
 
 \begin_layout Standard
