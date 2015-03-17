@@ -300,6 +300,67 @@ name "fig:Target-utility-function"
 \end_layout
 
 \begin_layout Section
+Negotiation Strategy
+\end_layout
+
+\begin_layout Standard
+As the assigment text stated, the negotiation strategy we have implemented
+ both focus on the social welfare as well as doing as good as possible for
+ ourselves.
+ The strategy consists of two main parts: evaluating incoming bids and generatio
+n new bids.
+\end_layout
+
+\begin_layout Subsection
+Evaluating incoming bids
+\end_layout
+
+\begin_layout Standard
+Whenever a new bid is received, the agent first updates the model it has
+ of the bidder with the new bid, before setting the field 
+\emph on
+lastBid 
+\emph default
+to the incoming bid.
+ Then when it's asked to 
+\emph on
+chooseAction()
+\emph default
+ it needs to evaluate how good the 
+\emph on
+lastBid
+\emph default
+ is and if it's are willing to accept it.
+ The function called 
+\emph on
+shouldAccept() 
+\emph default
+is then called, which as explained above, returns true if the utility of
+ 
+\emph on
+lastBid
+\emph default
+ is greater than or equal to the current target utility that is calculated
+ by the function 
+\emph on
+getTargetUtility() .
+ 
+\emph default
+As we can see from figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Target-utility-function"
+
+\end_inset
+
+, the target utility will stay close to 1.0 until half of the rounds is passed
+ before declining to the reservation value of 0.6.
+
+\emph on
+ 
+\end_layout
+
+\begin_layout Section
 Results
 \end_layout
 
