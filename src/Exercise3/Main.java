@@ -1,7 +1,10 @@
 package Exercise3;
 
+import Exercise3.containers.Item;
 import jade.Boot;
+import jade.core.AID;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 public class Main {

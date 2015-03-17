@@ -1,6 +1,7 @@
 package Exercise3;
 
 import Exercise3.containers.Item;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class ResourceManager {
 
     private static ArrayList<HashMap<Item, Integer>> resourceDistribution(ArrayList<ArrayList<Double>> ownedResourcesFractions, ArrayList<ArrayList<Double>> wantedResourcesFractions, int nrOfAgents){
         ArrayList<HashMap<Item, Integer>> distributions = new ArrayList<HashMap<Item, Integer>>();
-        for(int i = 0; i< nrOfAgents; i++){
+        for(int i = 0; i < nrOfAgents; i++){
             HashMap<Item, Integer> resourceDeficit = new HashMap<Item, Integer>();
             for(int j = 0; j < ownedResourcesFractions.size(); j++){
                 resourceDeficit.put(Item.values()[j],(int)(nrOfAgents*amountResources*(ownedResourcesFractions.get(j).get(i) - wantedResourcesFractions.get(j).get(i))));
