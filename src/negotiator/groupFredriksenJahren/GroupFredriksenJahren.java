@@ -18,7 +18,6 @@ import negotiator.utility.UtilitySpace;
  * This is your negotiation party.
  */
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
-
     private Bid lastBid;
     private Bid myLastBid;
     private double targetUtility = 1.0f;
@@ -32,13 +31,10 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @param timeline Value counting from 0 (start) to 1 (end).
      * @param randomSeed If you use any randomization, use this seed for it.
      */
-    public GroupFredriksenJahren(UtilitySpace utilitySpace,
-                  Map<DeadlineType, Object> deadlines,
-                  Timeline timeline,
-                  long randomSeed) {
+    public GroupFredriksenJahren(UtilitySpace utilitySpace, Map<DeadlineType, Object> deadlines, Timeline timeline, long randomSeed) {
         super(utilitySpace, deadlines, timeline, randomSeed);
-
     }
+
 
     /**
      * Each round this method gets called and ask you to accept or offer. The first party in
@@ -51,11 +47,11 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
     public Action chooseAction(List<Class> validActions) {
         if (!validActions.contains(Accept.class) || !shouldAccept()) {
             return new Offer(generateBid());
-        }
-        else {
+        } else {
             return new Accept();
         }
     }
+
 
     private boolean shouldAccept(){
         calculateTargetUtility();
@@ -67,20 +63,22 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
         return incomingBidBetter || higherThanReservationValue;
     }
 
+
     private void calculateTargetUtility(){
-        if(this.timeline.getCurrentTime() <= (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime())){
+        if(this.timeline.getCurrentTime() <= (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime())) {
             float a = (float)((0.875 - 1)/(int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()));
             targetUtility = a*this.timeline.getCurrentTime() + 1;
-        }
-        else if(this.timeline.getCurrentTime() > (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()) && this.timeline.getCurrentTime() < (int)(((float)35/(float)36)*this.timeline.getTotalTime())){
+
+        } else if(this.timeline.getCurrentTime() > (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()) && this.timeline.getCurrentTime() < (int)(((float)35/(float)36)*this.timeline.getTotalTime())){
             float a = (float)((0.625 - 0.875)/(int)Math.ceil(((float)7/(float)36)*this.timeline.getTotalTime()));
             targetUtility = a*(this.timeline.getCurrentTime()-(int)(((float)28/(float)36)*this.timeline.getTotalTime())) + 0.875;
-        }
-        else{
-            float a = (float)((0.0f - 0.625f)/(int)Math.ceil(((float)1/(float)36)*this.timeline.getTotalTime()));
+
+        } else {
+            float a = ((0.0f - 0.625f)/(int)Math.ceil(((float)1/(float)36)*this.timeline.getTotalTime()));
             targetUtility = a*(this.timeline.getCurrentTime()-(int)(((float)35/(float)36)*this.timeline.getTotalTime())) + 0.625;
         }
     }
+
 
     private Bid generateBid(){
         Bid bid = null;
@@ -99,10 +97,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
         }
         myLastBid = bid;
         return bid;
-
-
-
     }
+
 
     private Bid getBidBetterThan(double previousUtility){
         Bid bid;
@@ -121,6 +117,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
         return bid;
     }
 
+
     private double averageOpponentUtility(Bid bid){
         double sum = 0;
         for(BayesianOpponentModelScalable model : opponentModels.values()){
@@ -130,7 +127,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
                 e.printStackTrace();
             }
         }
-        return sum/(double)opponentModels.size();
+        return sum / (double) opponentModels.size();
     }
 
 
@@ -144,11 +141,12 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
     @Override
     public void receiveMessage(Object sender, Action action) {
         super.receiveMessage(sender, action);
-        if(action instanceof Offer){
+        if(action instanceof Offer)
             lastBid = ((Offer)action).getBid();
-        }
+
         updateOpponentModel(sender);
     }
+
 
     private void updateOpponentModel(Object agent){
         BayesianOpponentModelScalable model = opponentModels.get(agent);
@@ -156,13 +154,11 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
             model = new BayesianOpponentModelScalable(this.utilitySpace);
             opponentModels.put(agent, model);
         }
-        else{
-            try {
-                model.updateBeliefs(lastBid);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
+		try {
+			model.updateBeliefs(lastBid);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
