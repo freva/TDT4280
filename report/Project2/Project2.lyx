@@ -307,12 +307,12 @@ Negotiation Strategy
 As the assigment text stated, the negotiation strategy we have implemented
  both focus on the social welfare as well as doing as good as possible for
  ourselves.
- The strategy consists of two main parts: evaluating incoming bids and generatio
-n new bids.
+ The strategy consists of three main parts: evaluating incoming bids, generating
+ new bids and calculation of the target value.
 \end_layout
 
 \begin_layout Subsection
-Evaluating incoming bids
+Evaluating Incoming Bids
 \end_layout
 
 \begin_layout Standard
@@ -330,7 +330,7 @@ chooseAction()
 \emph on
 lastBid
 \emph default
- is and if it's are willing to accept it.
+ is and if it's willing to accept it.
  The function called 
 \emph on
 shouldAccept() 
@@ -343,7 +343,7 @@ lastBid
  is greater than or equal to the current target utility that is calculated
  by the function 
 \emph on
-getTargetUtility() .
+getTargetUtility().
  
 \emph default
 As we can see from figure 
@@ -358,6 +358,62 @@ reference "fig:Target-utility-function"
 
 \emph on
  
+\emph default
+The reasoning behind this is that we wanted the agent to try to achieve
+ the highest possible utility as long as possible before starting to reduce
+ it, hoping that someone will 
+\begin_inset Quotes eld
+\end_inset
+
+give in
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The reason why the target value is reduced, is that although we want as
+ high as possible utility, it is better to come to an agreement and have
+ a utility close the reservation value than not coming to an agreement at
+ all.
+ 
+\end_layout
+
+\begin_layout Subsection
+Generating New Bids
+\end_layout
+
+\begin_layout Standard
+Whenever an incoming bid does not satisfy the acceptance requirement as
+ described above, the agent needs to create a counter offer.
+ Before creating the offer, the agent finds the current target utility by
+ calling 
+\emph on
+getTargetUtility()
+\emph default
+ and sets the resulting utility as the lower bound for the offer it will
+ create.
+ The offer itself is then created by looping over all possible bids, searching
+ for the bid with utility higher than the lower bound and that maximizes
+ the product of the agents utility multiplied with the average opponent
+ utility.
+ The average opponent utility is calculated using the function 
+\emph on
+getAverageOpponentUtility(Bid).
+ 
+\emph default
+That way the agent is ensured that the bid is the best bid for all parts
+ with an utility higher than the lower bound for the agent itself.
+ 
+\end_layout
+
+\begin_layout Subsection
+Calculation of Target Value
+\end_layout
+
+\begin_layout Standard
+Based on the description of our strategy so far, we see that the target
+ value plays an important part in the decision making process of the agent.
+ Both in the evaluation of incoming bids and when generating new bids.
+  
 \end_layout
 
 \begin_layout Section
