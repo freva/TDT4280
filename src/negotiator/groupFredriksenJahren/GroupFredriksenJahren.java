@@ -19,9 +19,11 @@ import negotiator.utility.UtilitySpace;
  * This is your negotiation party.
  */
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
-    private Bid lastBid;
-    private Bid myLastBid;
     private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<Object, BayesianOpponentModelScalable>();
+    private Bid myLastBid;
+    private Bid lastBid;
+    private static final double reservationValue = 0.6;
+    private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(7d/9);
 
     /**
      * Please keep this constructor. This is called by genius.
@@ -45,11 +47,21 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      */
     @Override
     public Action chooseAction(List<Class> validActions) {
-        if (!validActions.contains(Accept.class) || !shouldAccept()) {
+        if (!validActions.contains(Accept.class) || !shouldAccept(lastBid)) {
             return new Offer(generateBid());
         } else {
             return new Accept();
         }
+    }
+
+
+    /**
+     * Checks if you should accept following bid
+     * @param bid bid to check
+     * @return true if the bid is acceptable, false otherwise
+     */
+    private boolean shouldAccept(Bid bid){
+        return getUtility(bid) >= getTargetUtility();
     }
 
 
@@ -90,51 +102,10 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	}
 
 
-	/**
-	 * Calculates average expected utility between the opponents based on their model
-	 * @param bid the bid to evaluate
-	 * @return average expected utility
-	 */
-	private double getAverageOpponentUtility(Bid bid){
-		double sum = 0;
-		for(BayesianOpponentModelScalable model : opponentModels.values()){
-			try {
-				sum += model.getExpectedUtility(bid);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return sum / (double) opponentModels.size();
-	}
-
-
-    private boolean shouldAccept(){
-        double targetUtil = getTargetUtility();
-        boolean incomingBidBetter = false;
-        if(myLastBid != null){
-            incomingBidBetter = getUtility(lastBid) >= getUtility(myLastBid);
-        }
-        boolean higherThanReservationValue = getUtility(lastBid) >= targetUtil;
-        return incomingBidBetter || higherThanReservationValue;
-    }
-
-
-    private double getTargetUtility(){
-        if(this.timeline.getCurrentTime() <= (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime())) {
-            float a = (float)((0.875 - 1)/(int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()));
-            return a * this.timeline.getCurrentTime() + 1;
-
-        } else if(this.timeline.getCurrentTime() > (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()) && this.timeline.getCurrentTime() < (int)(((float)35/(float)36)*this.timeline.getTotalTime())){
-            float a = (float)((0.625 - 0.875)/(int)Math.ceil(((float)7/(float)36)*this.timeline.getTotalTime()));
-            return a * (this.timeline.getCurrentTime()-(int)(((float)28/(float)36)*this.timeline.getTotalTime())) + 0.875;
-
-        } else {
-            float a = ((0.0f - 0.625f)/(int)Math.ceil(((float)1/(float)36)*this.timeline.getTotalTime()));
-            return a * (this.timeline.getCurrentTime()-(int)(((float)35/(float)36)*this.timeline.getTotalTime())) + 0.625;
-        }
-    }
-
-
+    /**
+     * Generates max utility bid if this is the first round, otherwise generates best acceptable bid
+     * @return the generated bid
+     */
     private Bid generateBid() {
         Bid bid = null;
         if(myLastBid == null) {
@@ -150,8 +121,39 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
         myLastBid = bid;
         return bid;
     }
-	
 
+
+	/**
+	 * Calculates average expected utility between the opponents based on their model
+	 * @param bid the bid to evaluate
+	 * @return average expected utility
+	 */
+	private double getAverageOpponentUtility(Bid bid){
+		double sum = 0;
+		for(BayesianOpponentModelScalable model : opponentModels.values()){
+			try {
+				sum += model.getExpectedUtility(bid);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return sum / opponentModels.size();
+	}
+
+
+    /**
+     * Calculates target value for bid as function of current time
+     * @return double in [reservationValue, 1]
+     */
+    private double getTargetUtility() {
+        return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), beta));
+    }
+
+
+    /**
+     * Generates best acceptable bid
+     * @return the generated bid
+     */
     private Bid getBestBid() {
 		Bid maxBid = null;
 		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility();
