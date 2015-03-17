@@ -6,6 +6,7 @@ import java.util.Map;
 
 import agents.bayesianopponentmodel.BayesianOpponentModelScalable;
 import negotiator.Bid;
+import negotiator.BidIterator;
 import negotiator.DeadlineType;
 import negotiator.Timeline;
 import negotiator.actions.Accept;
@@ -20,7 +21,6 @@ import negotiator.utility.UtilitySpace;
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
     private Bid lastBid;
     private Bid myLastBid;
-    private double targetUtility = 1.0f;
     private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<Object, BayesianOpponentModelScalable>();
 
     /**
@@ -95,7 +95,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 * @param bid the bid to evaluate
 	 * @return average expected utility
 	 */
-	private double averageOpponentUtility(Bid bid){
+	private double getAverageOpponentUtility(Bid bid){
 		double sum = 0;
 		for(BayesianOpponentModelScalable model : opponentModels.values()){
 			try {
@@ -109,65 +109,71 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 
 
     private boolean shouldAccept(){
-        calculateTargetUtility();
+        double targetUtil = getTargetUtility();
         boolean incomingBidBetter = false;
         if(myLastBid != null){
             incomingBidBetter = getUtility(lastBid) >= getUtility(myLastBid);
         }
-        boolean higherThanReservationValue = getUtility(lastBid) >= targetUtility;
+        boolean higherThanReservationValue = getUtility(lastBid) >= targetUtil;
         return incomingBidBetter || higherThanReservationValue;
     }
 
 
-    private void calculateTargetUtility(){
+    private double getTargetUtility(){
         if(this.timeline.getCurrentTime() <= (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime())) {
             float a = (float)((0.875 - 1)/(int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()));
-            targetUtility = a*this.timeline.getCurrentTime() + 1;
+            return a * this.timeline.getCurrentTime() + 1;
 
         } else if(this.timeline.getCurrentTime() > (int)Math.ceil(((float)28/(float)36)*this.timeline.getTotalTime()) && this.timeline.getCurrentTime() < (int)(((float)35/(float)36)*this.timeline.getTotalTime())){
             float a = (float)((0.625 - 0.875)/(int)Math.ceil(((float)7/(float)36)*this.timeline.getTotalTime()));
-            targetUtility = a*(this.timeline.getCurrentTime()-(int)(((float)28/(float)36)*this.timeline.getTotalTime())) + 0.875;
+            return a * (this.timeline.getCurrentTime()-(int)(((float)28/(float)36)*this.timeline.getTotalTime())) + 0.875;
 
         } else {
             float a = ((0.0f - 0.625f)/(int)Math.ceil(((float)1/(float)36)*this.timeline.getTotalTime()));
-            targetUtility = a*(this.timeline.getCurrentTime()-(int)(((float)35/(float)36)*this.timeline.getTotalTime())) + 0.625;
+            return a * (this.timeline.getCurrentTime()-(int)(((float)35/(float)36)*this.timeline.getTotalTime())) + 0.625;
         }
     }
 
 
-    private Bid generateBid(){
+    private Bid generateBid() {
         Bid bid = null;
-        if(myLastBid == null){
+        if(myLastBid == null) {
             try {
                 bid = this.utilitySpace.getMaxUtilityBid();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            bid = getBestBid();
         }
-        else{
-            double previousUtility = getUtility(myLastBid);
-            for(int i = 0; i < 5 && bid == null; i++){
-                bid = getBidBetterThan(previousUtility - (0.05*i));
-            }
-        }
+
         myLastBid = bid;
         return bid;
     }
+	
 
-    private Bid getBidBetterThan(double previousUtility){
-        Bid bid;
-        int counter = 0;
-        while(true){
-            bid = generateRandomBid();
-            if(getUtility(bid) >= previousUtility && getUtility(bid) >= averageOpponentUtility(bid)){
-                break;
-            }
-            counter++;
-            if(counter > 1000){
-                bid = null;
-                break;
-            }
-        }
-        return bid;
+    private Bid getBestBid() {
+		Bid maxBid = null;
+		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility();
+
+		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
+		if(!bidIterator.hasNext()) return null;
+		else {
+			while(bidIterator.hasNext()) {
+				Bid thisBid = bidIterator.next();
+				double thisOwnUtil = getUtility(thisBid);
+
+				if(thisOwnUtil > minAcceptable) {
+					double thisAvgUtil = getAverageOpponentUtility(thisBid);
+					if (thisAvgUtil * thisOwnUtil > maxAvgUtil * maxOwnUtil) {
+						maxAvgUtil = thisAvgUtil;
+						maxOwnUtil = thisOwnUtil;
+						maxBid = thisBid;
+					}
+				}
+			}
+
+			return maxBid;
+		}
     }
 }
