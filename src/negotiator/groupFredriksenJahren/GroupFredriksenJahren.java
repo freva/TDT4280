@@ -177,7 +177,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 				}
 			}
 
-			if(acceptableBids.size() == 0 || 1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) > Math.random()) return maxBid;
+			if(acceptableBids.size() == 0 || 1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) < Math.random()) return maxBid;
 			else return acceptableBids.get((int) (Math.random() * acceptableBids.size()));
 		}
     }
