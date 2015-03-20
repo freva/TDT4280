@@ -101,6 +101,10 @@ today
 Implementation
 \end_layout
 
+\begin_layout Subsection
+Methods
+\end_layout
+
 \begin_layout Standard
 Our implementation consists of eight functions in a single class.
  The functions are:
@@ -238,6 +242,99 @@ bid
 for all other agents.
 \end_layout
 
+\begin_layout Subsection
+Iterations
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Iterations"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We had four main iterations:
+\end_layout
+
+\begin_layout Subsubsection
+First
+\end_layout
+
+\begin_layout Paragraph
+Bid acceptance 
+\end_layout
+
+\begin_layout Standard
+Accepts the bid with fifty percent chance.
+\end_layout
+
+\begin_layout Paragraph
+Bid generation
+\end_layout
+
+\begin_layout Standard
+Generates random bid using utility space's 
+\emph on
+generateRandomBid()
+\emph default
+.
+\end_layout
+
+\begin_layout Paragraph
+Conclusion
+\end_layout
+
+\begin_layout Standard
+We can see from the result that Boulware has major advantage over our agent
+ because it can hold longer until we match it's expectations.
+ When playing against ourselfs, the negotiations end very quickly, almost
+ always under ten rounds.
+\end_layout
+
+\begin_layout Subsubsection
+Second
+\end_layout
+
+\begin_layout Paragraph
+Bid acceptance
+\end_layout
+
+\begin_layout Standard
+Accept bids over a target value.
+ The target value is defined as a linear function of time of what we expect
+ to receive.
+ (See figure X).
+\end_layout
+
+\begin_layout Paragraph*
+Bid generation
+\end_layout
+
+\begin_layout Standard
+Generates random bids until it can find a bid that is larger than the target
+ value and where the average expected utility of opponents is less than
+ our utility.
+\end_layout
+
+\begin_layout Paragraph
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Our agents utility is significantly better, in fact, it is the best.
+ The main problem now is that the agent plays not as good versus itself,
+ each of them is simply trying to wait the others out and have his bid excepted.
+ Because our target value drops rapidly during the last five rounds, we
+ were able to reach an agreement.
+ However, we have no reservation value, and if unlucky, one agent could
+ end up accepting a terrible bid if the negotiations drag out to final round.
+\end_layout
+
+\begin_layout Subsubsection
+Third
+\end_layout
+
 \begin_layout Standard
 \begin_inset Float figure
 wide false
@@ -328,13 +425,9 @@ concessionRate
 getTargetUtility()
 \emph default
 : 
-\begin_inset Newline newline
-\end_inset
-
-
 \begin_inset Formula 
 \begin{eqnarray*}
-consessionRate & = & \frac{(1-getTargetUtility())}{10}\\
+consessionRate & = & \frac{(1-getTargetUtility())}{10}
 \end{eqnarray*}
 
 \end_inset
@@ -378,13 +471,9 @@ concessionRate
  has been calculated the agent uses that value to calculate the value the
  agent will require as a lower bound of the utility of the incoming bid:
  
-\begin_inset Newline newline
-\end_inset
-
-
 \begin_inset Formula 
 \begin{eqnarray*}
-lowerBound & = & 1-(concessionRate*numberOfConcessions)\\
+lowerBound & = & 1-(concessionRate*numberOfConcessions)
 \end{eqnarray*}
 
 \end_inset
@@ -515,15 +604,14 @@ currentTime
 
  which determines how late the resulting target value should begin to decline
  towards the reservation value.
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+targetValue & = & reservationValue+(1-reservationValue)*(1-(\frac{currentTime}{totalTime})^{\beta})
+\end{eqnarray*}
 
-\begin_inset Newline newline
-\end_inset
-
-
-\begin_inset Formula $targetValue=reservationValue+(1-reservationValue)*(1-(\frac{currentTime}{totalTime})^{\beta})$
 \end_inset
 
 
@@ -535,6 +623,24 @@ Results
 
 \begin_layout Subsection
 Experimental test results
+\end_layout
+
+\begin_layout Standard
+The two tables below show the results that we used to evaluate the strength
+ of our agent while developing it.
+ The first table shows the results of our agent against a Boulware agent
+ and a Conceder agent.
+ The second table shows the result against itself.
+ All results are from first agent running with party domain 1, second is
+ running party domain 2 and third agent runs party domain 3.
+ The results are taken from different iterations described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Iterations"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection
