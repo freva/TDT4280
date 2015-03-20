@@ -317,17 +317,32 @@ lastBid
 \emph on
 shouldAccept() 
 \emph default
-is then called, which as explained above, returns true if the utility of
- 
+is then called, which as explained above, returns true if the agent should
+ accept the offer and false otherwise.
+ To determine this, the agent first calculates a 
 \emph on
-lastBid
+concessionRate
 \emph default
- is greater than or equal to the current target utility that is calculated
- by the function 
+ using the function 
 \emph on
-getTargetUtility(numTimes).
- 
+getTargetUtility()
 \emph default
+: 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+consessionRate & = & \frac{(1-getTargetUtility())}{10}\\
+\end{eqnarray*}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
 As we can see from figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -335,11 +350,14 @@ reference "fig:Target-utility-function"
 
 \end_inset
 
-, the target utility will stay close to 1.0 until the bidder has conceeded
- half of the possible rounds before declining to the reservation value of
- 0.6.
- The reasoning behind this is that we wanted the agent to try to achieve
- the highest possible utility as long as possible before starting to reduce
+, the target utility returned by the function 
+\emph on
+getTargetUtility()
+\emph default
+, will stay close to 1.0 until half of the rounds has passed before declining
+ to the reservation value of 0.6.
+ The reasoning behind this is that we want the agent to try to achieve the
+ highest possible utility as long as possible before starting to reduce
  it, hoping that someone will 
 \begin_inset Quotes eld
 \end_inset
@@ -353,23 +371,48 @@ give in
  high as possible utility, it is better to come to an agreement and have
  a utility close to the reservation value than not coming to an agreement
  at all.
- Here it is important to notice that when calculating the target value for
- acceptance, the number of times the bidder has conceded earlier, is used
- instead of the number of rounds passed as one can see in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Target-utility-function"
+ After the 
+\emph on
+concessionRate
+\emph default
+ has been calculated the agent uses that value to calculate the value the
+ agent will require as a lower bound of the utility of the incoming bid:
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+lowerBound & = & 1-(concessionRate*numberOfConcessions)\\
+\end{eqnarray*}
 
 \end_inset
 
-.
- That way the agent requires a higher utility on bids from opponents that
- rarely conceeds than from opponents that conceeds more often.
- Opponents that rely on other players to reduce its acceptance level, will
- then struggle to get to an agreement playing against the agent.
 
+\begin_inset Newline newline
+\end_inset
+
+As we can see from the above equation there is a parameter called 
 \emph on
+numberOfConcessions.
  
+\emph default
+That parameter is the number of times the bidder has conceeded in the last
+ ten rounds.
+ Hence also the reason why we divide by 10 when calculating the 
+\emph on
+concessionRate.
+ 
+\emph default
+The reason for keeping track of the number of times the opponents has conceeded
+ in the last ten rounds is that we then have the ability to require a higher
+ utility on bids from opponents that rarely conceeds than from opponents
+ that conceeds more often.
+ Opponents that rely on other players to reduce its acceptance level, will
+ have to change strategy in order to come to an agreement at all.
+ If the utility of the incoming bid is higher or equal to the lower bound,
+ the agent will accept it.
 \end_layout
 
 \begin_layout Subsection
@@ -2520,6 +2563,10 @@ Average
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Conclusion
 \end_layout
 
 \end_body
