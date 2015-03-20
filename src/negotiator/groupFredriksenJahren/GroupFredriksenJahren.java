@@ -61,7 +61,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return true if the bid is acceptable, false otherwise
      */
     private boolean shouldAccept(Map.Entry<Object, Bid> bid){
-		double concessionRate = (1-getTargetUtility(timeline.getCurrentTime()))/10;
+		double concessionRate = (1-getTargetUtility())/10;
 
 		return getUtility(bid.getValue()) >= 1 - concessionRate*Long.bitCount(concessions.get(bid.getKey()));
     }
@@ -134,10 +134,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * Calculates target value for bid as function of current time
      * @return double in [reservationValue, 1]
      */
-
-
-	private double getTargetUtility(double numTimes) {
-		return reservationValue + (1-reservationValue)*(1 - Math.pow(numTimes/timeline.getTotalTime(), beta));
+	private double getTargetUtility() {
+		return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), beta));
 	}
 
 
@@ -146,7 +144,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 * @return the generated bid
 	 */
 	private Bid generateBid() {
-		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility(timeline.getCurrentTime());
+		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility();
 		ArrayList<Bid> acceptableBids = new ArrayList<>();
 		Bid maxBid = null, maxUtilBid = null;
 
