@@ -1,8 +1,6 @@
 package negotiator.groupFredriksenJahren;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import agents.bayesianopponentmodel.BayesianOpponentModelScalable;
 import negotiator.Bid;
@@ -20,7 +18,9 @@ import negotiator.utility.UtilitySpace;
  */
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
     private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<Object, BayesianOpponentModelScalable>();
-    private Bid lastBid;
+	private HashMap<Object, Integer> concessions = new HashMap<Object, Integer>();
+	private HashMap<Object, Bid> lastBids = new HashMap<Object, Bid>();
+    private Map.Entry<Object, Bid> lastBid;
     private static final double reservationValue = 0.6;
     private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(8d/9);
 
@@ -47,7 +47,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
     @Override
     public Action chooseAction(List<Class> validActions) {
         if (!validActions.contains(Accept.class) || !shouldAccept(lastBid)) {
-            return new Offer(generateBid());
+			lastBid = new AbstractMap.SimpleEntry<Object, Bid>(this, generateBid());
+            return new Offer(lastBid.getValue());
         } else {
             return new Accept();
         }
@@ -59,8 +60,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @param bid bid to check
      * @return true if the bid is acceptable, false otherwise
      */
-    private boolean shouldAccept(Bid bid){
-        return getUtility(bid) >= getTargetUtility();
+    private boolean shouldAccept(Map.Entry<Object, Bid> bid){
+        return getUtility(bid.getValue()) >= getTargetUtility(concessions.get(bid.getKey()));
     }
 
 
@@ -75,7 +76,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	public void receiveMessage(Object sender, Action action) {
 		super.receiveMessage(sender, action);
 		if(action instanceof Offer) {
-			lastBid = ((Offer) action).getBid();
+			lastBid = new AbstractMap.SimpleEntry<Object, Bid>(sender, ((Offer) action).getBid());
 			updateOpponentModel(sender, lastBid);
 		} else if(action instanceof Accept) {
 			updateOpponentModel(sender, lastBid);
@@ -88,16 +89,20 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 * @param agent the sender of the bid
 	 * @param bid the bid
 	 */
-	private void updateOpponentModel(Object agent, Bid bid) {
+	private void updateOpponentModel(Object agent, Map.Entry<Object, Bid> bid) {
 		BayesianOpponentModelScalable model = opponentModels.get(agent);
 		if(model == null){
-			model = new BayesianOpponentModelScalable(this.utilitySpace);
+			model = new BayesianOpponentModelScalable(utilitySpace);
 			opponentModels.put(agent, model);
+			concessions.put(agent, 0);
+			lastBids.put(agent, bid.getValue());
 		}
 
 		try {
-			System.out.println("Updating " + agent + " " + model.haveSeenBefore(bid) + " " + lastBid);
-			model.updateBeliefs(bid);
+			model.updateBeliefs(bid.getValue());
+
+			if(! lastBids.get(agent).equals(bid.getValue()))
+				concessions.put(agent, concessions.get(agent)+1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -121,25 +126,19 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		return sum / opponentModels.size();
 	}
 
-	private double getMinOpponentUtility(Bid bid){
-		double min = Double.MAX_VALUE;
-		for(BayesianOpponentModelScalable model : opponentModels.values()){
-			try {
-				min = Math.min(min, model.getExpectedUtility(bid));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return min;
-	}
 
     /**
      * Calculates target value for bid as function of current time
      * @return double in [reservationValue, 1]
      */
     private double getTargetUtility() {
-        return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), beta));
+        return getTargetUtility(timeline.getCurrentTime());
     }
+
+
+	private double getTargetUtility(double numTimes) {
+		return reservationValue + (1-reservationValue)*(1 - Math.pow(numTimes/timeline.getTotalTime(), beta));
+	}
 
 
 	/**
@@ -147,8 +146,18 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 * @return the generated bid
 	 */
 	private Bid generateBid() {
-		Bid maxBid = null;
+		if(timeline.getCurrentTime() < 5) {
+			try {
+				return utilitySpace.getMaxUtilityBid();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+
 		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility();
+		ArrayList<Bid> acceptableBids = new ArrayList<Bid>();
+		Bid maxBid = null;
 
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
 		if(!bidIterator.hasNext()) return null;
@@ -158,6 +167,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 				double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
 
 				if(thisOwnUtil > minAcceptable) {
+					acceptableBids.add(thisBid);
 					double thisAvgUtil = getAverageOpponentUtility(thisBid);
 					if (thisAvgUtil * thisOwnUtil > maxAvgUtil * maxOwnUtil) {
 						maxAvgUtil = thisAvgUtil;
@@ -167,9 +177,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 				}
 			}
 
-			System.out.println(getTimeLine().getCurrentTime() + ": " + maxOwnUtil + " " + maxAvgUtil);
-			lastBid = maxBid;
-			return maxBid;
+			if(acceptableBids.size() == 0 || 1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) > Math.random()) return maxBid;
+			else return acceptableBids.get((int) (Math.random() * acceptableBids.size()));
 		}
     }
 }
