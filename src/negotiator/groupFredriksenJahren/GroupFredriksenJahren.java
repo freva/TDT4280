@@ -17,9 +17,9 @@ import negotiator.utility.UtilitySpace;
  * This is your negotiation party.
  */
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
-    private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<Object, BayesianOpponentModelScalable>();
-	private HashMap<Object, Integer> concessions = new HashMap<Object, Integer>();
-	private HashMap<Object, Bid> lastBids = new HashMap<Object, Bid>();
+    private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<>();
+	private HashMap<Object, Long> concessions = new HashMap<>();
+	private HashMap<Object, Bid> lastBids = new HashMap<>();
     private Map.Entry<Object, Bid> lastBid;
     private static final double reservationValue = 0.6;
     private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(8d/9);
@@ -48,7 +48,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
     public Action chooseAction(List<Class> validActions) {
         if (!validActions.contains(Accept.class) || !shouldAccept(lastBid)) {
 			lastBid = new AbstractMap.SimpleEntry<Object, Bid>(this, generateBid());
-            return new Offer(lastBid.getValue());
+			return new Offer(lastBid.getValue());
         } else {
             return new Accept();
         }
@@ -61,7 +61,9 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return true if the bid is acceptable, false otherwise
      */
     private boolean shouldAccept(Map.Entry<Object, Bid> bid){
-        return getUtility(bid.getValue()) >= getTargetUtility(concessions.get(bid.getKey()));
+		double concessionRate = (1-getTargetUtility())/10;
+
+		return getUtility(bid.getValue()) >= 1 - concessionRate*Long.bitCount(concessions.get(bid.getKey()));
     }
 
 
@@ -76,7 +78,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	public void receiveMessage(Object sender, Action action) {
 		super.receiveMessage(sender, action);
 		if(action instanceof Offer) {
-			lastBid = new AbstractMap.SimpleEntry<Object, Bid>(sender, ((Offer) action).getBid());
+			lastBid = new AbstractMap.SimpleEntry<>(sender, ((Offer) action).getBid());
 			updateOpponentModel(sender, lastBid);
 		} else if(action instanceof Accept) {
 			updateOpponentModel(sender, lastBid);
@@ -94,15 +96,16 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		if(model == null){
 			model = new BayesianOpponentModelScalable(utilitySpace);
 			opponentModels.put(agent, model);
-			concessions.put(agent, 0);
+			concessions.put(agent, 0L);
 			lastBids.put(agent, bid.getValue());
 		}
 
 		try {
 			model.updateBeliefs(bid.getValue());
 
-			if(! lastBids.get(agent).equals(bid.getValue()))
-				concessions.put(agent, concessions.get(agent)+1);
+			if(! concessions.containsKey(bid.getKey())) return;
+			long out = (concessions.get(bid.getKey())<<1) + (lastBids.get(agent).equals(bid.getValue()) ? 0 : 1);
+			concessions.put(agent, out & 1023);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,18 +149,9 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 * @return the generated bid
 	 */
 	private Bid generateBid() {
-		if(timeline.getCurrentTime() < 5) {
-			try {
-				return utilitySpace.getMaxUtilityBid();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-
 		double maxAvgUtil = 0, maxOwnUtil = 0, minAcceptable = getTargetUtility();
-		ArrayList<Bid> acceptableBids = new ArrayList<Bid>();
-		Bid maxBid = null;
+		ArrayList<Bid> acceptableBids = new ArrayList<>();
+		Bid maxBid = null, maxUtilBid = null;
 
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
 		if(!bidIterator.hasNext()) return null;
@@ -166,7 +160,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 				Bid thisBid = bidIterator.next();
 				double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
 
-				if(thisOwnUtil > minAcceptable) {
+				if(getUtility(maxUtilBid) < getUtility(thisBid)) maxUtilBid = thisBid;
+				if(thisOwnUtil >= minAcceptable) {
 					acceptableBids.add(thisBid);
 					double thisAvgUtil = getAverageOpponentUtility(thisBid);
 					if (thisAvgUtil * thisOwnUtil > maxAvgUtil * maxOwnUtil) {
@@ -177,7 +172,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 				}
 			}
 
-			if(acceptableBids.size() == 0 || 1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) < Math.random()) return maxBid;
+			if(maxBid == null) return maxUtilBid;
+			else if(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) < Math.random()) return maxBid;
 			else return acceptableBids.get((int) (Math.random() * acceptableBids.size()));
 		}
     }
