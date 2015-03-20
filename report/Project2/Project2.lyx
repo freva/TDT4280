@@ -128,21 +128,29 @@ generateBid()
 \emph on
 shouldAccept(bid)
 \emph default
-: Returns true if agent's utility of the 
+: Calculates a 
+\emph on
+concessionRate
+\emph default
+ = (1-
+\emph on
+getTargetUtility(currentTime)
+\emph default
+)/10, before returning true if the agent's utility of the 
 \emph on
 bid
 \emph default
- is greater than or equal to the value returned by 
+ is greater than or equal to 1 - 
 \emph on
-getTargetUtility()
+concessionRate
 \emph default
-.
+*(nr of concessions the last 10 rounds by the bidder).
 \end_layout
 
 \begin_layout Itemize
 
 \emph on
-getTargetUtility()
+getTargetUtility(currentTime)
 \emph default
 : Returns minimum acceptable utility at current time (See figure 
 \begin_inset CommandInset ref
@@ -168,7 +176,7 @@ sender
 action
 \emph default
 .
- The 
+ If the 
 \emph on
 action
 \emph default
@@ -176,29 +184,34 @@ action
 \emph on
 Offer
 \emph default
+ or an 
+\emph on
+Accept
+\emph default
 , it is passed over to 
 \emph on
 updateOpponentModel()
 \emph default
 .
+ 
 \end_layout
 
 \begin_layout Itemize
 
 \emph on
-updateOpponentModel(sender, action)
+updateOpponentModel(sender, bid)
 \emph default
-: Updates a dictionary of 
+: Updates the dictionaries of 
 \emph on
-BayesianOpponentModelScalable
+BayesianOpponentModelScalable, concessions 
+\emph default
+and 
+\emph on
+lastBids
 \emph default
  for the current 
 \emph on
 sender
-\emph default
- with it's 
-\emph on
-action
 \emph default
 .
 \end_layout
@@ -207,34 +220,6 @@ action
 
 \emph on
 generateBid()
-\emph default
-: In the first round will return 
-\emph on
-getMaximumUtilityBid()
-\emph default
-, and after will return 
-\emph on
-getBestBid()
-\emph default
-.
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-getAverageOpponentUtility(bid)
-\emph default
-: Returns the average expected utility of 
-\emph on
-bid 
-\emph default
-for all other agents.
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-getBestBid()
 \emph default
 : Loops over all 
 \emph on
@@ -258,9 +243,25 @@ getUtility(bid)
 \emph default
  and 
 \emph on
+getAverageOpponentUtility(bid) 
+\emph default
+or a random bid with utility greater than 
+\emph on
+getTargetUtility(currentTime)
+\emph default
+ with a certain probability.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
 getAverageOpponentUtility(bid)
 \emph default
-.
+: Returns the average expected utility of 
+\emph on
+bid 
+\emph default
+for all other agents.
 \end_layout
 
 \begin_layout Standard
@@ -305,10 +306,10 @@ Negotiation Strategy
 
 \begin_layout Standard
 As the assigment text stated, the negotiation strategy we have implemented
- both focus on the social welfare as well as doing as good as possible for
- ourselves.
+ both focus on coming to an agreement as well as doing as good as possible
+ for ourselves.
  The strategy consists of three main parts: evaluating incoming bids, generating
- new bids and calculation of the target value.
+ new bids and calculating the target value.
 \end_layout
 
 \begin_layout Subsection
@@ -343,7 +344,7 @@ lastBid
  is greater than or equal to the current target utility that is calculated
  by the function 
 \emph on
-getTargetUtility().
+getTargetUtility(numTimes).
  
 \emph default
 As we can see from figure 
@@ -353,13 +354,10 @@ reference "fig:Target-utility-function"
 
 \end_inset
 
-, the target utility will stay close to 1.0 until half of the rounds is passed
- before declining to the reservation value of 0.6.
-
-\emph on
- 
-\emph default
-The reasoning behind this is that we wanted the agent to try to achieve
+, the target utility will stay close to 1.0 until the bidder has conceeded
+ half of the possible rounds before declining to the reservation value of
+ 0.6.
+ The reasoning behind this is that we wanted the agent to try to achieve
  the highest possible utility as long as possible before starting to reduce
  it, hoping that someone will 
 \begin_inset Quotes eld
@@ -372,8 +370,24 @@ give in
 .
  The reason why the target value is reduced, is that although we want as
  high as possible utility, it is better to come to an agreement and have
- a utility close the reservation value than not coming to an agreement at
- all.
+ a utility close to the reservation value than not coming to an agreement
+ at all.
+ Here it is important to notice that when calculating the target value for
+ acceptance, the number of times the bidder has conceded earlier, is used
+ instead of the number of rounds passed as one can see in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Target-utility-function"
+
+\end_inset
+
+.
+ That way the agent requires a higher utility on bids from opponents that
+ rarely conceeds than from opponents that conceeds more often.
+ Opponents that rely on other players to reduce its acceptance level, will
+ then struggle to get to an agreement playing against the agent.
+
+\emph on
  
 \end_layout
 
@@ -391,18 +405,44 @@ getTargetUtility()
 \emph default
  and sets the resulting utility as the lower bound for the offer it will
  create.
- The offer itself is then created by looping over all possible bids, searching
- for the bid with utility higher than the lower bound and that maximizes
- the product of the agents utility multiplied with the average opponent
- utility.
+ In this case the target value is only dependent on the fraction 
+\emph on
+currentRound/totalRounds
+\emph default
+ as opposed to the fraction 
+\emph on
+numberOfConcessions/totalRounds
+\emph default
+ used when evaluating incoming bids as explained above.
+ The offer itself is then created by looping over all possible bids, adding
+ all bids with utility higher than the lower bound to an array of acceptable
+ bids.
+ The bid with utility higher than the lower bound and that maximizes the
+ product of the agents utility multiplied with the average opponent utility,
+ the 
+\emph on
+maxBid
+\emph default
+, is also kept track of.
+ That bid is the best bid for all parts with a utility higher than the lower
+ bound for the agent itself.
  The average opponent utility is calculated using the function 
 \emph on
 getAverageOpponentUtility(Bid).
  
 \emph default
-That way the agent is ensured that the bid is the best bid for all parts
- with an utility higher than the lower bound for the agent itself.
- 
+Depending on the fraction 
+\emph on
+currentRound/totalRounds
+\emph default
+ the bid to offer is selected at random from the array mentioned above or
+ set to the 
+\emph on
+maxBid
+\emph default
+, with a probability.
+ Whenever no acceptable bids can be found, the agent will offer the best
+ possible bid it can generate.
 \end_layout
 
 \begin_layout Subsection
@@ -411,9 +451,51 @@ Calculation of Target Value
 
 \begin_layout Standard
 Based on the description of our strategy so far, we see that the target
- value plays an important part in the decision making process of the agent.
+ value plays an important role in the decision making process of the agent.
  Both in the evaluation of incoming bids and when generating new bids.
-  
+ The calculation of the target value are dependent on three different parameters
+: 
+\emph on
+reservationValue
+\emph default
+, 
+\emph on
+currentTime
+\emph default
+ and 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ 
+\emph on
+reservationValue
+\emph default
+ is of course the value that is the minimum value that our agent will ever
+ accept.
+ 
+\emph on
+currentTime
+\emph default
+ is the current round number the negotiation process is currently on, and
+ lastly we have the 
+\begin_inset Formula $\beta$
+\end_inset
+
+ which determines how late the resulting target value should begin to decline
+ towards the reservation value.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula $targetValue=reservationValue+(1-reservationValue)*(1-(\frac{currentTime}{totalTime})^{\beta})$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
