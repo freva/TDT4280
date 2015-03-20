@@ -128,29 +128,24 @@ generateBid()
 \emph on
 shouldAccept(bid)
 \emph default
-: Calculates a 
-\emph on
-concessionRate
-\emph default
- = (1-
-\emph on
-getTargetUtility(currentTime)
-\emph default
-)/10, before returning true if the agent's utility of the 
+: Returns true if the agent should accept 
 \emph on
 bid
 \emph default
- is greater than or equal to 1 - 
-\emph on
-concessionRate
-\emph default
-*(nr of concessions the last 10 rounds by the bidder).
+, false otherwise (See section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Evaluating-Incoming-Bids"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Itemize
 
 \emph on
-getTargetUtility(currentTime)
+getTargetUtility()
 \emph default
 : Returns minimum acceptable utility at current time (See figure 
 \begin_inset CommandInset ref
@@ -221,35 +216,14 @@ sender
 \emph on
 generateBid()
 \emph default
-: Loops over all 
-\emph on
-bid
-\emph default
-s, first filters out all the 
-\emph on
-bid
-\emph default
-s less than the 
-\emph on
-getTargetUtility()
-\emph default
-, and returns the 
-\emph on
-bid
-\emph default
- that produces maximum product of 
-\emph on
-getUtility(bid)
-\emph default
- and 
-\emph on
-getAverageOpponentUtility(bid) 
-\emph default
-or a random bid with utility greater than 
-\emph on
-getTargetUtility(currentTime)
-\emph default
- with a certain probability.
+: Returns the best bid the agent can offer at this point (See section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Generating-New-Bids"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Itemize
@@ -314,6 +288,13 @@ As the assigment text stated, the negotiation strategy we have implemented
 
 \begin_layout Subsection
 Evaluating Incoming Bids
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Evaluating-Incoming-Bids"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -392,7 +373,14 @@ reference "fig:Target-utility-function"
 \end_layout
 
 \begin_layout Subsection
-Generating New Bids
+Generating New Bids 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Generating-New-Bids"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
