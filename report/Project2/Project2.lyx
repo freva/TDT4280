@@ -667,10 +667,21 @@ concessionRate
 \emph on
 getTargetUtility()
 \emph default
-: 
+ and 
+\emph on
+n
+\emph default
+ (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Updating-Number-of"
+
+\end_inset
+
+) 
 \begin_inset Formula 
 \begin{eqnarray*}
-consessionRate & = & \frac{(1-getTargetUtility())}{10}
+consessionRate & = & \frac{(1-getTargetUtility())}{n}
 \end{eqnarray*}
 
 \end_inset
@@ -723,20 +734,32 @@ numberOfConcessions.
  
 \emph default
 That parameter is the number of times the bidder has conceded in the last
- ten rounds.
- Hence also the reason why we divide by 10 when calculating the 
+ 
+\emph on
+n
+\emph default
+ rounds.
+ Hence also the reason why we divide by 
+\emph on
+n
+\emph default
+ when calculating the 
 \emph on
 concessionRate.
  
 \emph default
 The reason for keeping track of the number of times the opponents has conceded
- in the last ten rounds is that we then have the ability to require a higher
- utility on bids from opponents that rarely concedes than from opponents
- that concedes more often.
+ in the last 
+\emph on
+n
+\emph default
+ rounds is that we then have the ability to require a higher utility on
+ bids from opponents that rarely concedes than from opponents that concedes
+ more often.
  Opponents that rely on other players to reduce its acceptance level, will
  have to change strategy in order to come to an agreement at all.
- If the utility of the incoming bid is higher or equal to the lower bound,
- the agent will accept it.
+ If the utility of the incoming bid is higher or equal to the lower bound
+ or we have reached the last round, the agent will accept it.
 \end_layout
 
 \begin_layout Subsection
@@ -1055,12 +1078,19 @@ updateOpponentModel(sender, bid)
 
 \begin_layout Subsubsection
 Updating Number of Concessions
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Updating-Number-of"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 As well as updating the model of the opponents utilities, the agent uses
  the incoming messages to update the number of times the sender has conceded
- the last 10 rounds.
+ the last rounds.
  To concede in our implementation means to either send an acceptance message
  or to send a new offer different than the previous offer.
  The reasoning behind this is that we want to reduce our acceptance level
@@ -1076,6 +1106,28 @@ punished
 \end_inset
 
 , by a much higher acceptance level.
+ To be able to come to an agreement with agents like ours with a high target
+ value for a long time, we only keep track of the 
+\emph on
+n 
+\emph default
+most recent concessions.
+ This 
+\emph on
+n 
+\emph default
+is calculated as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+n & = & \lceil totalTime*0.05\rceil
+\end{eqnarray*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
