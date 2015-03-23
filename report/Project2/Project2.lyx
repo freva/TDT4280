@@ -113,7 +113,18 @@ name "sub:Iterations"
 \end_layout
 
 \begin_layout Standard
-We had six main iterations:
+During development, we had six main iterations.
+ Below we describe the main changes done in each iteration.
+ The descriptions are split into changes done to bid acceptance and bid
+ generation with a short conclusion summarizing the result of the changes.
+ Performance results after each iteration are included in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Experimental-test-results"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -145,8 +156,15 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-We can see from the result that Boulware has major advantage over our agent
- because it can hold longer until we match it's expectations.
+We can see from the results (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Experimental-test-results-Against-Boulware-and"
+
+\end_inset
+
+) that Boulware has major advantage over our agent because it can hold longer
+ until we match it's expectations.
  When playing against ourselfs, the negotiations end very quickly, almost
  always under ten rounds.
 \end_layout
@@ -407,7 +425,7 @@ reference "sub:Updating-the-Opponents-Model"
 \begin_inset Formula $\beta$
 \end_inset
 
- value in our target utility function (see figure 
+-value in our target utility function (see figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Target-utility-function"
@@ -1034,7 +1052,7 @@ Methods
 \end_layout
 
 \begin_layout Standard
-Our implementation consists of eight functions in a single class.
+Our implementation consists of seven functions in a single class.
  The functions are:
 \end_layout
 
@@ -1168,7 +1186,14 @@ Results
 \end_layout
 
 \begin_layout Subsection
-Experimental test results
+Experimental test results 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Experimental-test-results"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1191,6 +1216,13 @@ reference "sub:Iterations"
 
 \begin_layout Subsubsection
 Against Boulware and Conceder
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Experimental-test-results-Against-Boulware-and"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1734,6 +1766,13 @@ Conceder
 
 \begin_layout Subsubsection
 Againts itself
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Experimental-test-results-Againts-itself"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
