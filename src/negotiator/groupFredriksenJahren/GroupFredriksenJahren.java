@@ -149,27 +149,24 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		Bid maxBid = null, maxUtilBid = null;
 
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
-		if(!bidIterator.hasNext()) return null;
-		else {
-			while(bidIterator.hasNext()) {
-				Bid thisBid = bidIterator.next();
-				double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
+		while(bidIterator.hasNext()) {
+			Bid thisBid = bidIterator.next();
+			double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
 
-				if(getUtility(maxUtilBid) < getUtility(thisBid)) maxUtilBid = thisBid;
-				if(thisOwnUtil >= minAcceptable) {
-					acceptableBids.add(thisBid);
-					double thisAvgUtil = getAverageOpponentUtility(thisBid);
-					if (thisAvgUtil * thisOwnUtil > maxAvgUtil * maxOwnUtil) {
-						maxAvgUtil = thisAvgUtil;
-						maxOwnUtil = thisOwnUtil;
-						maxBid = thisBid;
-					}
+			if(getUtility(maxUtilBid) < getUtility(thisBid)) maxUtilBid = thisBid;
+			if(thisOwnUtil >= minAcceptable) {
+				acceptableBids.add(thisBid);
+				double thisAvgUtil = getAverageOpponentUtility(thisBid);
+				if (thisAvgUtil * thisOwnUtil > maxAvgUtil * maxOwnUtil) {
+					maxAvgUtil = thisAvgUtil;
+					maxOwnUtil = thisOwnUtil;
+					maxBid = thisBid;
 				}
 			}
-
-			if(maxBid == null) return maxUtilBid;
-			else if(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) < Math.random()) return maxBid;
-			else return acceptableBids.get((int) (Math.random() * acceptableBids.size()));
 		}
+
+		if(maxBid == null) return maxUtilBid;
+		else if(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) < Math.random()) return maxBid;
+		else return acceptableBids.get((int) (Math.random() * acceptableBids.size()));
     }
 }
