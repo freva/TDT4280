@@ -256,7 +256,14 @@ Bid generation
 
 \begin_layout Standard
 Iterates over all possible bids and returns the bid with largest product
- of own utility and average opponent utility.
+ of own utility and average opponent utility (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:The-bestBid"
+
+\end_inset
+
+).
  
 \end_layout
 
@@ -749,6 +756,13 @@ getTargetUtility()
 The
 \emph on
  bestBid
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:The-bestBid"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
