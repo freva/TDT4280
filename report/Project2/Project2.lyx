@@ -101,8 +101,8 @@ today
 In this report we will describe our negotiation strategy developed for agents
  involved in multilateral negotiations.
  By doing so, we will first describe the process of evolving our strategy
- from a random agent to a much more sofisticated one, through a series of
- iterations.
+ from a random agent to a much more sophisticated one, through a series
+ of iterations.
  Then we will go over our final strategy in detail, before discussing test
  results from negotiation sessions with other agents and finally concluding
  with a summary of the experience of developing a negotiation strategy.
@@ -172,7 +172,7 @@ reference "sub:Experimental-test-results-Against-Boulware-and"
 
 ) that Boulware has major advantage over our agent because it can hold longer
  until we match it's expectations.
- When playing against ourselfs, the negotiations end very quickly, almost
+ When playing against ourselves, the negotiations end very quickly, almost
  always under ten rounds.
 \end_layout
 
@@ -206,7 +206,11 @@ Bid generation
 Generates random bids until it can find a bid that is larger than the target
  value and where the average expected utility of opponents is less than
  our utility.
- The average expected utility is based off BaysianOpponentModel.
+ The average expected utility is based off 
+\emph on
+BaysianOpponentModel
+\emph default
+.
 \end_layout
 
 \begin_layout Paragraph
@@ -315,7 +319,7 @@ Bid acceptance
 \end_layout
 
 \begin_layout Standard
-We changed from piecewise linear acceptance function to a boulware function
+We changed from piecewise linear acceptance function to a Boulware function
  with reservation value.
  This is an improvement because it means we wont accept very bad deals for
  us and also that the way we 
@@ -353,8 +357,8 @@ Conclusion
 
 \begin_layout Standard
 Again, there is no change against other agents because we end up accepting
- their offer, and against ourselfs the only change is that negotiation strectche
-s out a few rounds but with the same results.
+ their offer, and against ourselves the only change is that negotiation
+ stretches out a few rounds but with the same results.
 \end_layout
 
 \begin_layout Standard
@@ -409,7 +413,7 @@ Bid acceptance
 \end_layout
 
 \begin_layout Standard
-Until this point, we only updated opponents bayesian model if they submitted
+Until this point, we only updated opponents Bayesian model if they submitted
  an 
 \emph on
 offer
@@ -554,8 +558,8 @@ Conclusion
 \begin_layout Standard
 These changes made no difference against other agents, as expected, because
  they accept our bid anyway.
- But against ourselfs, it fixed all the problems that were highlighted in
- the previous iteration.
+ But against ourselves, it fixed all the problems that were highlighted
+ in the previous iteration.
 \end_layout
 
 \begin_layout Section
@@ -671,10 +675,6 @@ consessionRate & = & \frac{(1-getTargetUtility())}{10}
 
 \end_inset
 
-
-\begin_inset Newline newline
-\end_inset
-
 As we can see from figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -717,10 +717,6 @@ lowerBound & = & 1-(concessionRate*numberOfConcessions)
 
 \end_inset
 
-
-\begin_inset Newline newline
-\end_inset
-
 As we can see from the above equation there is a parameter called 
 \emph on
 numberOfConcessions.
@@ -733,10 +729,10 @@ That parameter is the number of times the bidder has conceded in the last
 concessionRate.
  
 \emph default
-The reason for keeping track of the number of times the opponents has conceeded
+The reason for keeping track of the number of times the opponents has conceded
  in the last ten rounds is that we then have the ability to require a higher
- utility on bids from opponents that rarely conceeds than from opponents
- that conceeds more often.
+ utility on bids from opponents that rarely concedes than from opponents
+ that concedes more often.
  Opponents that rely on other players to reduce its acceptance level, will
  have to change strategy in order to come to an agreement at all.
  If the utility of the incoming bid is higher or equal to the lower bound,
@@ -768,7 +764,10 @@ getTargetUtility()
 \emph default
  and sets the resulting utility as the lower bound for the offer it will
  create.
- In this case the lower bound is the actual value returned by getTargetUtility()
+ In this case the lower bound is the actual value returned by 
+\emph on
+getTargetUtility()
+\emph default
  as opposed to how the lower bound is calculated when evaluating incoming
  bids.
  After the lower bound is set, the offer itself is created by looping over
@@ -820,7 +819,7 @@ The
 \emph on
 maxBid,
 \emph default
- is the bid with highest utility for the agent.
+ is the bid with highest utility for our agent.
  The 
 \emph on
 maxBid 
