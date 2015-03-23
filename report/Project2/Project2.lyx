@@ -97,152 +97,11 @@ today
 
 \end_layout
 
+\begin_layout Abstract
+Abstract goes here.
+\end_layout
+
 \begin_layout Section
-Implementation
-\end_layout
-
-\begin_layout Subsection
-Methods
-\end_layout
-
-\begin_layout Standard
-Our implementation consists of eight functions in a single class.
- The functions are:
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-chooseAction()
-\emph default
-: If the agent has the option to accept, and if 
-\emph on
-shouldAccept() 
-\emph default
-returns true, the agent accepts the offer.
- Otherwise it generates own offer using 
-\emph on
-generateBid()
-\emph default
-.
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-shouldAccept(bid)
-\emph default
-: Returns true if the agent should accept 
-\emph on
-bid
-\emph default
-, false otherwise (See section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sub:Evaluating-Incoming-Bids"
-
-\end_inset
-
-).
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-getTargetUtility()
-\emph default
-: Returns minimum acceptable utility at current time (See figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Target-utility-function"
-
-\end_inset
-
-).
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-receiveMessage(sender, action)
-\emph default
-: Receives a message from a 
-\emph on
-sender
-\emph default
- with it's 
-\emph on
-action
-\emph default
-.
- If the 
-\emph on
-action
-\emph default
- is an 
-\emph on
-Offer
-\emph default
- or an 
-\emph on
-Accept
-\emph default
-, it is passed over to 
-\emph on
-updateOpponentModel()
-\emph default
-.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-updateOpponentModel(sender, bid)
-\emph default
-: Updates the dictionaries of 
-\emph on
-BayesianOpponentModelScalable, concessions 
-\emph default
-and 
-\emph on
-lastBids
-\emph default
- for the current 
-\emph on
-sender
-\emph default
-.
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-generateBid()
-\emph default
-: Returns the best bid the agent can offer at this point (See section 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sub:Generating-New-Bids"
-
-\end_inset
-
-).
-\end_layout
-
-\begin_layout Itemize
-
-\emph on
-getAverageOpponentUtility(bid)
-\emph default
-: Returns the average expected utility of 
-\emph on
-bid 
-\emph default
-for all other agents.
-\end_layout
-
-\begin_layout Subsection
 Iterations
 \begin_inset CommandInset label
 LatexCommand label
@@ -254,10 +113,10 @@ name "sub:Iterations"
 \end_layout
 
 \begin_layout Standard
-We had four main iterations:
+We had six main iterations:
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 First
 \end_layout
 
@@ -292,7 +151,7 @@ We can see from the result that Boulware has major advantage over our agent
  always under ten rounds.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Second
 \end_layout
 
@@ -301,7 +160,7 @@ Bid acceptance
 \end_layout
 
 \begin_layout Standard
-Accept bids over a target value.
+Accept bids over the target value.
  The target value is defined as a linear function of time of what we expect
  to receive.
  (See figure 
@@ -322,8 +181,7 @@ Bid generation
 Generates random bids until it can find a bid that is larger than the target
  value and where the average expected utility of opponents is less than
  our utility.
- The average expected utility is based off BaysianOpponentModel (see section
- X).
+ The average expected utility is based off BaysianOpponentModel.
 \end_layout
 
 \begin_layout Paragraph
@@ -333,11 +191,12 @@ Conclusion
 \begin_layout Standard
 Our agents utility is significantly better, in fact, it is the best.
  The main problem now is that the agent plays not as good versus itself,
- each of them is simply trying to wait the others out and have his bid excepted.
+ each of them is simply trying to wait the others out and have its bid accepted.
  Because our target value drops rapidly during the last five rounds, we
  were able to reach an agreement.
  However, we have no reservation value, and if unlucky, one agent could
- end up accepting a terrible bid if the negotiations drag out to final round.
+ end up accepting a terrible bid if the negotiations drag out to the final
+ round.
 \end_layout
 
 \begin_layout Standard
@@ -379,7 +238,7 @@ name "fig:The-target-utility-iter-2"
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Third
 \end_layout
 
@@ -396,8 +255,9 @@ Bid generation
 \end_layout
 
 \begin_layout Standard
-Iterates over all possible bids and and returns the bid with largest product
+Iterates over all possible bids and returns the bid with largest product
  of own utility and average opponent utility.
+ 
 \end_layout
 
 \begin_layout Paragraph
@@ -414,7 +274,7 @@ Against the other agents, we get no change in results, this is because at
  fast.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Fourth
 \end_layout
 
@@ -425,8 +285,8 @@ Bid acceptance
 \begin_layout Standard
 We changed from piecewise linear acceptance function to a boulware function
  with reservation value.
- This is an improvement because it means we will wont accept very bad for
- us deals and also that the way we 
+ This is an improvement because it means we wont accept very bad deals for
+ us and also that the way we 
 \begin_inset Quotes eld
 \end_inset
 
@@ -436,8 +296,8 @@ give in
 
  is more even.
  Before this change, in the last five rounds our target value dropped from
- 0.6 to 0, whereas now we drop from 0.6488 to 0.6 in last 5.
- The new target utility function is shown in figure 
+ 0.6 to 0, whereas now we drops only from 0.6488 to 0.6 The new target utility
+ function is shown in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Target-utility-function-3"
@@ -508,7 +368,7 @@ name "fig:Target-utility-function-3"
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Fifth
 \end_layout
 
@@ -524,12 +384,19 @@ offer
 \emph default
 , but in order to be able to generate better offers so that other agents
  will accept our offer, we started updating opponent model also when they
- sent 
+ send 
 \emph on
 accept
 \emph default
- (see section X).
- We also updated our increased our 
+ (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Updating-the-Opponents-Model"
+
+\end_inset
+
+).
+ We also increased our 
 \begin_inset Formula $\beta$
 \end_inset
 
@@ -541,7 +408,7 @@ reference "fig:Target-utility-function"
 \end_inset
 
 ).
- Finally, instead of basing target value as a function of time, we base
+ Finally, instead of basing the target value as a function of time, we base
  it as function of time and how often the other agent has conceded in past
  rounds.
 \end_layout
@@ -559,8 +426,8 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-Our agent performed significantly better against other, in the end our offer
- was accepted at our max utility.
+Our agent performed significantly better against the other agents, in the
+ end our offer was accepted at our max utility.
  However, results against ourself were terrible.
  As can be seen from the graph, our target utility drops very slowly, after
  
@@ -575,9 +442,9 @@ Our agent performed significantly better against other, in the end our offer
  This means that the other agents wont detect any concession and thus will
  not accept opponents bid.
  Another problem is that because the agent sent the same bid over and over
- again, the others didn't have much of opportunity to learn about its preference
-s, so at the end, while they are ready to concede, they don't know what
- to concede.
+ again, the others didn't have much of an opportunity to learn about its
+ preferences, so at the end, while they were ready to concede, they didn't
+ know what to concede.
 \end_layout
 
 \begin_layout Standard
@@ -616,7 +483,7 @@ name "fig:Target-utility-function"
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Sixth
 \end_layout
 
@@ -625,11 +492,7 @@ Bid acceptance
 \end_layout
 
 \begin_layout Standard
-When deciding if we should accept the bid, we no longer rely solely on target
- utility as function of time.
- Now, the target utility as function of time represents the most we are
- willing to concede (to agent that regularly concedes), but to agents that
- never concede, we wont concede either (see section X for more details).
+Unchanged from fifth iteration.
 \end_layout
 
 \begin_layout Paragraph
@@ -638,11 +501,18 @@ Bid generation
 
 \begin_layout Standard
 Inspired by simulated annealing algorithm, we implemented a version of temperatu
-re and randomness to our big generation.
+re and randomness to our bid generation.
  Early on, we are more likely to offer a bid chosen randomly amongst the
  bid that are greater than our target value at this stage, but towards the
  end, we are more likely to offer bid that we believe is the best for us
- and the others (as described in section X).
+ and the others (as described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Choosing-Which-Bid"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Paragraph
@@ -661,12 +531,63 @@ Negotiation Strategy
 \end_layout
 
 \begin_layout Standard
-As the assigment text stated, the negotiation strategy we have implemented
- both focus on coming to an agreement as well as doing as good as possible
- for ourselves.
+The negotiation strategy we have implemented both focuses on coming to an
+ agreement as well as doing as good as possible for ourselves.
  The strategy consists of four main parts: evaluating incoming bids, generating
  new bids, updating the models of the opponents and calculating the target
  value.
+\end_layout
+
+\begin_layout Subsection
+Calculation of Target Value
+\end_layout
+
+\begin_layout Standard
+Based on the description of our strategy so far, we see that the target
+ value plays an important role in the decision making process of the agent.
+ Both in the evaluation of incoming bids and when generating new bids.
+ The calculation of the target value are dependent on three different parameters
+: 
+\emph on
+reservationValue
+\emph default
+, 
+\emph on
+currentTime
+\emph default
+ and 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ 
+\emph on
+reservationValue
+\emph default
+ is of course the value that is the minimum value that our agent will ever
+ accept.
+ 
+\emph on
+currentTime
+\emph default
+ is the current round number the negotiation process is currently on, and
+ lastly we have the 
+\begin_inset Formula $\beta$
+\end_inset
+
+ which determines how late the resulting target value should begin to decline
+ towards the reservation value.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+targetValue & = & reservationValue+(1-reservationValue)*(1-(\frac{currentTime}{totalTime})^{\beta})
+\end{eqnarray*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -773,7 +694,7 @@ As we can see from the above equation there is a parameter called
 numberOfConcessions.
  
 \emph default
-That parameter is the number of times the bidder has conceeded in the last
+That parameter is the number of times the bidder has conceded in the last
  ten rounds.
  Hence also the reason why we divide by 10 when calculating the 
 \emph on
@@ -825,9 +746,9 @@ getTargetUtility()
 \end_layout
 
 \begin_layout Subsubsection
-The 
+The
 \emph on
-maxBid
+ bestBid
 \end_layout
 
 \begin_layout Standard
@@ -847,11 +768,21 @@ which loops over all opponent models and sums up each expected utility before
  dividing it by the number of opponents
 \emph on
 .
- 
 \end_layout
 
 \begin_layout Subsubsection
-Choosing Which Bid To Offer
+The maxBid
+\end_layout
+
+\begin_layout Subsubsection
+Choosing Which Bid to Offer
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Choosing-Which-Bid"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -862,7 +793,7 @@ currentRound/totalRounds
  the bid to offer is with a probability either selected at random from the
  array of acceptable bids mentioned above or set to the 
 \emph on
-maxBid
+bestBid
 \emph default
 .
  Whenever no acceptable bids can be found, the agent will offer the best
@@ -909,12 +840,12 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-		OwnUtil = Pow(U(bid), 2)
+		ownUtil = Pow(U(bid), 2)
 \end_layout
 
 \begin_layout Plain Layout
 
-		if OwnUtil >= targetUtility()
+		if ownUtil >= targetUtility()
 \end_layout
 
 \begin_layout Plain Layout
@@ -929,7 +860,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-			if avgUtil * OwnUtil > maxAvgUtil * maxOwnUtil
+			if avgUtil * ownUtil > maxAvgUtil * maxOwnUtil
 \end_layout
 
 \begin_layout Plain Layout
@@ -1011,11 +942,18 @@ name "alg:The-algorithm-for"
 \end_layout
 
 \begin_layout Subsection
-Updating The Model of The Opponents
+Updating the Model of the Opponents
 \end_layout
 
 \begin_layout Subsubsection
-Updating The Opponents Utility Model
+Updating the Opponents Utility Model
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Updating-the-Opponents-Model"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1077,56 +1015,138 @@ As well as updating the model of the opponents utilities, the agent uses
  the concessions of the different opponents.
 \end_layout
 
-\begin_layout Subsection
-Calculation of Target Value
+\begin_layout Section
+Methods
 \end_layout
 
 \begin_layout Standard
-Based on the description of our strategy so far, we see that the target
- value plays an important role in the decision making process of the agent.
- Both in the evaluation of incoming bids and when generating new bids.
- The calculation of the target value are dependent on three different parameters
-: 
+Our implementation consists of eight functions in a single class.
+ The functions are:
+\end_layout
+
+\begin_layout Itemize
+
 \emph on
-reservationValue
+chooseAction()
 \emph default
-, 
+: If the agent has the option to accept, and if 
 \emph on
-currentTime
+shouldAccept() 
 \emph default
- and 
-\begin_inset Formula $\beta$
+returns true, the agent accepts the offer.
+ Otherwise it generates own offer using 
+\emph on
+generateBid()
+\emph default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+shouldAccept(bid)
+\emph default
+: Returns true if the agent should accept 
+\emph on
+bid
+\emph default
+, false otherwise (See section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Evaluating-Incoming-Bids"
+
 \end_inset
 
+).
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+getTargetUtility()
+\emph default
+: Returns minimum acceptable utility at current time (See figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Target-utility-function"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+receiveMessage(sender, action)
+\emph default
+: Receives a message from a 
+\emph on
+sender
+\emph default
+ with it's 
+\emph on
+action
+\emph default
+.
+ If the 
+\emph on
+action
+\emph default
+ is an 
+\emph on
+Offer
+\emph default
+ or an 
+\emph on
+Accept
+\emph default
+, it is passed over to 
+\emph on
+updateOpponentModel()
+\emph default
 .
  
-\emph on
-reservationValue
-\emph default
- is of course the value that is the minimum value that our agent will ever
- accept.
- 
-\emph on
-currentTime
-\emph default
- is the current round number the negotiation process is currently on, and
- lastly we have the 
-\begin_inset Formula $\beta$
-\end_inset
-
- which determines how late the resulting target value should begin to decline
- towards the reservation value.
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-targetValue & = & reservationValue+(1-reservationValue)*(1-(\frac{currentTime}{totalTime})^{\beta})
-\end{eqnarray*}
+\begin_layout Itemize
+
+\emph on
+updateOpponentModel(sender, bid)
+\emph default
+: Updates the opponent model for 
+\emph on
+sender
+\emph default
+.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+generateBid()
+\emph default
+: Returns an acceptable bid the agent can offer at this point (See section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Generating-New-Bids"
 
 \end_inset
 
+).
+\end_layout
 
+\begin_layout Itemize
+
+\emph on
+getAverageOpponentUtility(bid)
+\emph default
+: Returns the average expected utility of 
+\emph on
+bid 
+\emph default
+for all other agents.
 \end_layout
 
 \begin_layout Section
