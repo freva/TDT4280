@@ -104,7 +104,7 @@ In this report we will describe our negotiation strategy developed for agents
  from a random agent to a much more sophisticated one, through a series
  of iterations.
  Then we will go over our final strategy in detail, before discussing test
- results from negotiation sessions with other agents and finally concluding
+ results from negotiation sessions with other agents and finally conclude
  with a summary of the experience of developing a negotiation strategy.
 \end_layout
 
@@ -1314,6 +1314,18 @@ Aside from the obstacles we met we found it really interesting and we learned
 
 \begin_layout Subsection
 Extensions
+\end_layout
+
+\begin_layout Standard
+In order to use our agent in a real-life negotiation, one would only have
+ to define the cost and preferences of the issues in the specific domain
+ in an XML file.
+ In theory one could instantly start using our agent by starting it up against
+ UI Party and whenever you get a response from your opponent you would enter
+ their response into the GUI of the UI Party agent.
+ The output you would get from our agent, meaning the bid our agent selects,
+ is what you should reply back.
+ 
 \end_layout
 
 \begin_layout Section
