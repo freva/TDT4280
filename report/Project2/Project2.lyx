@@ -664,8 +664,9 @@ Negotiation Strategy
 As the assigment text stated, the negotiation strategy we have implemented
  both focus on coming to an agreement as well as doing as good as possible
  for ourselves.
- The strategy consists of three main parts: evaluating incoming bids, generating
- new bids and calculating the target value.
+ The strategy consists of four main parts: evaluating incoming bids, generating
+ new bids, updating the models of the opponents and calculating the target
+ value.
 \end_layout
 
 \begin_layout Subsection
@@ -800,6 +801,10 @@ name "sub:Generating-New-Bids"
 
 \end_layout
 
+\begin_layout Subsubsection
+Finding Acceptable Bids
+\end_layout
+
 \begin_layout Standard
 Whenever an incoming bid does not satisfy the acceptance requirement as
  described above, the agent needs to create a counter offer.
@@ -816,7 +821,17 @@ getTargetUtility()
  After the lower bound is set, the offer itself is created by looping over
  all possible bids and adding all bids with utility higher than the lower
  bound to an array of acceptable bids.
- The bid with utility higher than the lower bound and that maximizes the
+ 
+\end_layout
+
+\begin_layout Subsubsection
+The 
+\emph on
+maxBid
+\end_layout
+
+\begin_layout Standard
+The bid with utility higher than the lower bound and that maximizes the
  product of the agents utility and the average opponent utility, the 
 \emph on
 maxBid
@@ -833,7 +848,13 @@ which loops over all opponent models and sums up each expected utility before
 \emph on
 .
  
-\emph default
+\end_layout
+
+\begin_layout Subsubsection
+Choosing Which Bid To Offer
+\end_layout
+
+\begin_layout Standard
 Depending on the fraction 
 \emph on
 currentRound/totalRounds
@@ -846,8 +867,15 @@ maxBid
 .
  Whenever no acceptable bids can be found, the agent will offer the best
  possible bid it can generate.
- Below you can see the the algorithm for selecting what bid to offer as
- explained above:
+ In algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:The-algorithm-for"
+
+\end_inset
+
+ you can see the algorithm for selecting what bid to offer as explained
+ above.
 \begin_inset Float algorithm
 wide false
 sideways false
@@ -962,6 +990,13 @@ Bid generateBid()
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+The algorithm for generating new bids
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:The-algorithm-for"
+
+\end_inset
+
 
 \end_layout
 
@@ -973,6 +1008,73 @@ Bid generateBid()
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Updating The Model of The Opponents
+\end_layout
+
+\begin_layout Subsubsection
+Updating The Opponents Utility Model
+\end_layout
+
+\begin_layout Standard
+Each time our agent receives a message, it makes sure that the senders model
+ is updated.
+ This both when receving a new offer and when receiving a concession.
+ When the agent receives a new offer it calls the function 
+\emph on
+updateOpponentModel(sender, bid)
+\emph default
+, where the 
+\emph on
+sender
+\emph default
+ is the opponent to update and the 
+\emph on
+bid
+\emph default
+ is the senders new offer.
+ In the function 
+\emph on
+updateOpponentModel(sender, bid)
+\emph default
+ the agent first checks if it already has a model of the sender in its dictionar
+y of models.
+ If such a model does not already exist, it creates a new model using the
+ built in method BayesianOpponentModelScalable(utilitySpace) before adding
+ it to the dictionary.
+ Then the model is updated with the 
+\emph on
+bid
+\emph default
+, by calling 
+\emph on
+updateBeliefs(bid)
+\emph default
+.
+ When the agent receives a concession on the other hand, the bid in 
+\emph on
+updateOpponentModel(sender, bid)
+\emph default
+ is not the senders bid, but the last bid that has been made by any opponent.
+ The reason why the agent chooses to update the sender model with the last
+ bid, is that although the bid does not come from the sender, the bid is
+ an offer the sender would accept, meaning that the bid might be just as
+ good for updating the model as a bid coming directly from the sender.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Updating Number of Concessions
+\end_layout
+
+\begin_layout Standard
+As well as updating the model of the opponents utilities, the agent uses
+ the incoming messages to update the number of times the sender has conceeded
+ the last 10 rounds.
+ Similarly to the utility models, a dictionary is used to keep track of
+ the concessions of the different opponents.
 \end_layout
 
 \begin_layout Subsection
