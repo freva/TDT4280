@@ -304,7 +304,14 @@ Bid acceptance
 Accept bids over a target value.
  The target value is defined as a linear function of time of what we expect
  to receive.
- (See figure X).
+ (See figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-target-utility-iter-2"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Paragraph*
@@ -315,6 +322,8 @@ Bid generation
 Generates random bids until it can find a bid that is larger than the target
  value and where the average expected utility of opponents is less than
  our utility.
+ The average expected utility is based off BaysianOpponentModel (see section
+ X).
 \end_layout
 
 \begin_layout Paragraph
@@ -331,15 +340,93 @@ Our agents utility is significantly better, in fact, it is the best.
  end up accepting a terrible bid if the negotiations drag out to final round.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename TargetUtilFunction2.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The target utility function after the second iteration
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-target-utility-iter-2"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection
 Third
+\end_layout
+
+\begin_layout Paragraph
+Bid acceptance
+\end_layout
+
+\begin_layout Standard
+Unchanged from second iteration.
+\end_layout
+
+\begin_layout Paragraph
+Bid generation
+\end_layout
+
+\begin_layout Standard
+Iterates over all possible bids and and returns the bid with largest product
+ of own utility and average opponent utility.
+\end_layout
+
+\begin_layout Paragraph
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Against the other agents, we get no change in results, this is because at
+ this stage, our offers are still to bad, and in the end we end up accepting
+ someone else's offer.
+ However, against ourselves, we can see great improvements.
+ The utility distribution is much more even and we managed to strike a deal
+ before entering the last five rounds where target utility drops off very
+ fast.
+\end_layout
+
+\begin_layout Subsubsection
+Fourth
+\end_layout
+
+\begin_layout Paragraph
+Bid acceptance
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
@@ -563,10 +650,6 @@ maxBid
  possible bid it can generate.
  Below you can see the the algorithm for selecting what bid to offer as
  explained above:
-\begin_inset Newline newline
-\end_inset
-
-
 \begin_inset Float algorithm
 wide false
 sideways false
@@ -600,7 +683,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-		OwnUtil = Pow(U(bid),2)
+		OwnUtil = Pow(U(bid), 2)
 \end_layout
 
 \begin_layout Plain Layout
@@ -610,7 +693,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-			acceptableBids <-- bid
+			acceptableBids.add(bid)
 \end_layout
 
 \begin_layout Plain Layout
@@ -650,7 +733,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-	else if Pow(timeFraction,2) > Random(0,1)
+	else if Pow(timeFraction, 2) > Random(0,1)
 \end_layout
 
 \begin_layout Plain Layout
@@ -686,10 +769,6 @@ Bid generateBid()
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
