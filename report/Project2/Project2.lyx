@@ -98,7 +98,14 @@ today
 \end_layout
 
 \begin_layout Abstract
-Abstract goes here.
+In this report we will describe our negotiation strategy developed for agents
+ involved in multilateral negotiations.
+ By doing so, we will first describe the process of evolving our strategy
+ from a random agent to a much more sofisticated one, through a series of
+ iterations.
+ Then we will go over our final strategy in detail, before discussing test
+ results from negotiation sessions with other agents and finally concluding
+ with a summary of the experience of developing a negotiation strategy.
 \end_layout
 
 \begin_layout Section
@@ -557,10 +564,11 @@ Negotiation Strategy
 
 \begin_layout Standard
 The negotiation strategy we have implemented both focuses on coming to an
- agreement as well as doing as good as possible for ourselves.
- The strategy consists of four main parts: evaluating incoming bids, generating
- new bids, updating the models of the opponents and calculating the target
- value.
+ agreement, as well as doing as good as possible for ourselves.
+ The strategy consists of four main parts: calculating the target value,
+ evaluating incoming bids, generating new bids and updating the models of
+ the opponents.
+ All four will be explained in the following sections.
 \end_layout
 
 \begin_layout Subsection
@@ -628,26 +636,25 @@ name "sub:Evaluating-Incoming-Bids"
 
 \begin_layout Standard
 Whenever a new bid is received, the agent first updates the model it has
- of the bidder with the new bid, before setting the field 
-\emph on
-lastBid 
-\emph default
-to the incoming bid.
+ of the bidder with the new bid.
  Then when it's asked to 
 \emph on
 chooseAction()
 \emph default
- it needs to evaluate how good the 
-\emph on
-lastBid
-\emph default
- is and if it's willing to accept it.
+ it needs to evaluate how good the incoming bid is and if it's willing to
+ accept it.
  The function called 
 \emph on
 shouldAccept() 
 \emph default
-is then called, which as explained above, returns true if the agent should
- accept the offer and false otherwise.
+is then called, which as explained in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Methods"
+
+\end_inset
+
+, returns true if the agent should accept the offer and false otherwise.
  To determine this, the agent first calculates a 
 \emph on
 concessionRate
@@ -787,7 +794,7 @@ name "sub:The-bestBid"
 The bid with utility higher than the lower bound and that maximizes the
  product of the agents utility and the average opponent utility, the 
 \emph on
-maxBid
+bestBid
 \emph default
 , is also kept track of.
  That bid is the best bid for all parts with a utility higher than the lower
@@ -803,7 +810,26 @@ which loops over all opponent models and sums up each expected utility before
 \end_layout
 
 \begin_layout Subsubsection
-The maxBid
+The 
+\emph on
+maxBid
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+maxBid,
+\emph default
+ is the bid with highest utility for the agent.
+ The 
+\emph on
+maxBid 
+\emph default
+is calculated using the built in function 
+\emph on
+getMaxUtilityBid()
+\emph default
+.
 \end_layout
 
 \begin_layout Subsubsection
@@ -829,7 +855,7 @@ bestBid
 \emph default
 .
  Whenever no acceptable bids can be found, the agent will offer the best
- possible bid it can generate.
+ possible bid it can generate, the maxBid.
  In algorithm 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -897,7 +923,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-				update max bid
+				update bestBid
 \end_layout
 
 \begin_layout Plain Layout
@@ -912,12 +938,12 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-	if not maxBid
+	if not bestBid
 \end_layout
 
 \begin_layout Plain Layout
 
-		return getMaxUtilityBid()
+		return maxBid
 \end_layout
 
 \begin_layout Plain Layout
@@ -927,7 +953,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-		return maxBid
+		return bestBid
 \end_layout
 
 \begin_layout Plain Layout
@@ -991,7 +1017,7 @@ name "sub:Updating-the-Opponents-Model"
 \begin_layout Standard
 Each time our agent receives a message, it makes sure that the senders model
  is updated.
- This both when receving a new offer and when receiving a concession.
+ This both when receving a new offer and when receiving a acceptance message.
  When the agent receives a new offer it calls the function 
 \emph on
 updateOpponentModel(sender, bid)
@@ -1005,29 +1031,22 @@ sender
 bid
 \emph default
  is the senders new offer.
- In the function 
+ The model of the 
 \emph on
-updateOpponentModel(sender, bid)
+sender
 \emph default
- the agent first checks if it already has a model of the sender in its dictionar
-y of models.
- If such a model does not already exist, it creates a new model using the
- built in method BayesianOpponentModelScalable(utilitySpace) before adding
- it to the dictionary.
- Then the model is updated with the 
-\emph on
-bid
-\emph default
-, by calling 
+ is then updated by calling the built in method 
 \emph on
 updateBeliefs(bid)
 \emph default
 .
- When the agent receives a concession on the other hand, the bid in 
+ When the agent receives a acceptance message on the other hand, the bid
+ in 
 \emph on
 updateOpponentModel(sender, bid)
 \emph default
- is not the senders bid, but the last bid that has been made by any opponent.
+ is not the senders new offer, but the last bid that has been made by any
+ opponent.
  The reason why the agent chooses to update the sender model with the last
  bid, is that although the bid does not come from the sender, the bid is
  an offer the sender would accept, meaning that the bid might be just as
@@ -1041,14 +1060,34 @@ Updating Number of Concessions
 
 \begin_layout Standard
 As well as updating the model of the opponents utilities, the agent uses
- the incoming messages to update the number of times the sender has conceeded
+ the incoming messages to update the number of times the sender has conceded
  the last 10 rounds.
- Similarly to the utility models, a dictionary is used to keep track of
- the concessions of the different opponents.
+ To concede in our implementation means to either send an acceptance message
+ or to send a new offer different than the previous offer.
+ The reasoning behind this is that we want to reduce our acceptance level
+ to opponents that either accepts a lot of offers or tries to offer new
+ offers to come to an agreement.
+ Opponents that keeps offering the same bid over and over, will on the other
+ hand get 
+\begin_inset Quotes eld
+\end_inset
+
+punished
+\begin_inset Quotes erd
+\end_inset
+
+, by a much higher acceptance level.
 \end_layout
 
 \begin_layout Section
 Methods
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Methods"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
