@@ -47,6 +47,11 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 */
     private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(8d/9);
 
+	/**
+	 * Number of rounds that should be part of history
+	 */
+	private static int historySize;
+
 
 
     /**
@@ -59,6 +64,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      */
     public GroupFredriksenJahren(UtilitySpace utilitySpace, Map<DeadlineType, Object> deadlines, Timeline timeline, long randomSeed) {
         super(utilitySpace, deadlines, timeline, randomSeed);
+		historySize = (int) Math.ceil(timeline.getTotalTime() * 0.05);
     }
 
 
@@ -86,7 +92,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return true if the bid is acceptable, false otherwise
      */
     private boolean shouldAccept(Map.Entry<Object, Bid> bid){
-		double concessionRate = (1-getTargetUtility())/10;
+		if(timeline.getCurrentTime() == timeline.getTotalTime()-1) return true;
+		double concessionRate = (1-getTargetUtility())/historySize;
 
 		return getUtility(bid.getValue()) >= 1 - concessionRate*Long.bitCount(concessions.get(bid.getKey()));
     }
@@ -132,7 +139,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 			if(! concessions.containsKey(bid.getKey())) return;
 			//Next level bit hacks
 			long out = (concessions.get(bid.getKey())<<1) + (lastBids.get(agent).equals(bid.getValue()) && !isAccept ? 0 : 1);
-			concessions.put(agent, out & 1023); //Keep history of only last 10 rounds.
+			concessions.put(agent, out & ((1<<historySize) - 1)); //Keep history of only last historySize rounds.
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -162,7 +169,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return double in [reservationValue, 1]
      */
 	private double getTargetUtility() {
-		return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), beta));
+		return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/(timeline.getTotalTime()-1), beta));
 	}
 
 
@@ -178,7 +185,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
 		while(bidIterator.hasNext()) {
 			Bid thisBid = bidIterator.next();
-			double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
+			double thisOwnUtil = getUtility(thisBid);
 
 			if(getUtility(maxBid) < getUtility(thisBid)) maxBid = thisBid;
 			if(thisOwnUtil >= minAcceptable) {
