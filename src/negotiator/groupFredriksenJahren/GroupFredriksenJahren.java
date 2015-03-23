@@ -79,9 +79,9 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 		super.receiveMessage(sender, action);
 		if(action instanceof Offer) {
 			lastBid = new AbstractMap.SimpleEntry<>(sender, ((Offer) action).getBid());
-			updateOpponentModel(sender, lastBid);
+			updateOpponentModel(sender, lastBid, false);
 		} else if(action instanceof Accept) {
-			updateOpponentModel(sender, lastBid);
+			updateOpponentModel(sender, lastBid, true);
 		}
 	}
 
@@ -91,7 +91,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	 * @param agent the sender of the bid
 	 * @param bid the bid
 	 */
-	private void updateOpponentModel(Object agent, Map.Entry<Object, Bid> bid) {
+	private void updateOpponentModel(Object agent, Map.Entry<Object, Bid> bid, boolean isAccept) {
 		BayesianOpponentModelScalable model = opponentModels.get(agent);
 		if(model == null){
 			model = new BayesianOpponentModelScalable(utilitySpace);
@@ -104,7 +104,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 			model.updateBeliefs(bid.getValue());
 
 			if(! concessions.containsKey(bid.getKey())) return;
-			long out = (concessions.get(bid.getKey())<<1) + (lastBids.get(agent).equals(bid.getValue()) ? 0 : 1);
+			long out = (concessions.get(bid.getKey())<<1) + (lastBids.get(agent).equals(bid.getValue()) && !isAccept ? 0 : 1);
 			concessions.put(agent, out & 1023);
 		} catch (Exception e) {
 			e.printStackTrace();
