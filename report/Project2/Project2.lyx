@@ -344,7 +344,7 @@ Our agents utility is significantly better, in fact, it is the best.
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
@@ -406,9 +406,9 @@ Conclusion
 
 \begin_layout Standard
 Against the other agents, we get no change in results, this is because at
- this stage, our offers are still to bad, and in the end we end up accepting
+ this stage, our offers are still too bad and in the end we end up accepting
  someone else's offer.
- However, against ourselves, we can see great improvements.
+ However, against ourselves, we can see improvements.
  The utility distribution is much more even and we managed to strike a deal
  before entering the last five rounds where target utility drops off very
  fast.
@@ -420,6 +420,164 @@ Fourth
 
 \begin_layout Paragraph
 Bid acceptance
+\end_layout
+
+\begin_layout Standard
+We changed from piecewise linear acceptance function to a boulware function
+ with reservation value.
+ This is an improvement because it means we will wont accept very bad for
+ us deals and also that the way we 
+\begin_inset Quotes eld
+\end_inset
+
+give in
+\begin_inset Quotes erd
+\end_inset
+
+ is more even.
+ Before this change, in the last five rounds our target value dropped from
+ 0.6 to 0, whereas now we drop from 0.6488 to 0.6 in last 5.
+ The new target utility function is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Target-utility-function-3"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph
+Bid generation
+\end_layout
+
+\begin_layout Standard
+Unchanged from third iteration.
+\end_layout
+
+\begin_layout Paragraph
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Again, there is no change against other agents because we end up accepting
+ their offer, and against ourselfs the only change is that negotiation strectche
+s out a few rounds but with the same results.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename TargetUtilFunction3.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Target utility function after third iteration
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Target-utility-function-3"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Fifth
+\end_layout
+
+\begin_layout Paragraph
+Bid acceptance
+\end_layout
+
+\begin_layout Standard
+Until this point, we only updated opponents bayesian model if they submitted
+ an 
+\emph on
+offer
+\emph default
+, but in order to be able to generate better offers so that other agents
+ will accept our offer, we started updating opponent model also when they
+ sent 
+\emph on
+accept
+\emph default
+ (see section X).
+ We also updated our increased our 
+\begin_inset Formula $\beta$
+\end_inset
+
+ value in our target utility function (see figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Target-utility-function"
+
+\end_inset
+
+).
+ Finally, instead of basing target value as a function of time, we base
+ it as function of time and how often the other agent has conceded in past
+ rounds.
+\end_layout
+
+\begin_layout Paragraph
+Bid generation
+\end_layout
+
+\begin_layout Standard
+Unchanged from third iteration.
+\end_layout
+
+\begin_layout Paragraph
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Our agent performed significantly better against other, in the end our offer
+ was accepted at our max utility.
+ However, results against ourself were terrible.
+ As can be seen from the graph, our target utility drops very slowly, after
+ 
+\begin_inset Formula $\frac{2}{3}$
+\end_inset
+
+ of the negotiation is over, our target utility has dropped less than 
+\begin_inset Formula $10^{-2}$
+\end_inset
+
+, so all this time we just suggest our max utility bid over and over again.
+ This means that the other agents wont detect any concession and thus will
+ not accept opponents bid.
+ Another problem is that because the agent sent the same bid over and over
+ again, the others didn't have much of opportunity to learn about its preference
+s, so at the end, while they are ready to concede, they don't know what
+ to concede.
 \end_layout
 
 \begin_layout Standard
@@ -456,6 +614,46 @@ name "fig:Target-utility-function"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection
+Sixth
+\end_layout
+
+\begin_layout Paragraph
+Bid acceptance
+\end_layout
+
+\begin_layout Standard
+When deciding if we should accept the bid, we no longer rely solely on target
+ utility as function of time.
+ Now, the target utility as function of time represents the most we are
+ willing to concede (to agent that regularly concedes), but to agents that
+ never concede, we wont concede either (see section X for more details).
+\end_layout
+
+\begin_layout Paragraph
+Bid generation
+\end_layout
+
+\begin_layout Standard
+Inspired by simulated annealing algorithm, we implemented a version of temperatu
+re and randomness to our big generation.
+ Early on, we are more likely to offer a bid chosen randomly amongst the
+ bid that are greater than our target value at this stage, but towards the
+ end, we are more likely to offer bid that we believe is the best for us
+ and the others (as described in section X).
+\end_layout
+
+\begin_layout Paragraph
+Conclusion
+\end_layout
+
+\begin_layout Standard
+These changes made no difference against other agents, as expected, because
+ they accept our bid anyway.
+ But against ourselfs, it fixed all the problems that were highlighted in
+ the previous iteration.
 \end_layout
 
 \begin_layout Section
@@ -861,7 +1059,7 @@ Against Boulware and Conceder
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="8">
+<lyxtabular version="3" rows="7" columns="8">
 <features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -1170,11 +1368,159 @@ Conceder
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,13205
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,33191
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2,07458
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+143
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,87833
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,71383
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,48241
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,00000
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,67808
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,89378
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+170
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1,00000
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,29693
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,59685
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
 \end_layout
 
 \end_inset
@@ -1256,7 +1602,7 @@ Againts itself
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="8">
+<lyxtabular version="3" rows="7" columns="8">
 <features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -1565,11 +1911,159 @@ FJ 3
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,00000
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,09652
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2,33131
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+169
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,70917
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,87605
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,74609
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+180
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,00000
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,00000
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0,00000
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
 \end_layout
 
 \end_inset
@@ -1605,7 +2099,7 @@ FJ 3
 \begin_inset Text
 
 \begin_layout Plain Layout
-178
+176
 \end_layout
 
 \end_inset
