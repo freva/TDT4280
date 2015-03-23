@@ -1272,6 +1272,51 @@ for all other agents.
 \end_layout
 
 \begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Subsection
+Experiences
+\end_layout
+
+\begin_layout Standard
+When developing our negotiation strategy we met a lot of obstacles:
+\end_layout
+
+\begin_layout Itemize
+Large changes to parts of the strategy sometimes made no difference to the
+ final outcome because of the dependencies between the other agents.
+\end_layout
+
+\begin_layout Itemize
+Solving one problem would sometimes lead to new problems arising.
+ Raising the 
+\begin_inset Formula $\beta$
+\end_inset
+
+ value yields better performane against other agents, but increases the
+ risk of not coming to an agreement when negotiating with similar agents.
+ 
+\end_layout
+
+\begin_layout Itemize
+Setting up and understanding the GENIUS framework.
+ 
+\end_layout
+
+\begin_layout Standard
+Aside from the obstacles we met we found it really interesting and we learned
+ a lot while evolving our strategy.
+ As well as using well known negotiation tactics as inspiration for our
+ strategy, we also had to use our creativity.
+ 
+\end_layout
+
+\begin_layout Subsection
+Extensions
+\end_layout
+
+\begin_layout Section
 Results
 \end_layout
 
@@ -3640,10 +3685,6 @@ Average
 \end_inset
 
 
-\end_layout
-
-\begin_layout Section
-Conclusion
 \end_layout
 
 \end_body
