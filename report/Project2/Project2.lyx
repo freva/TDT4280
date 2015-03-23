@@ -525,44 +525,177 @@ getTargetUtility()
 \emph default
  and sets the resulting utility as the lower bound for the offer it will
  create.
- In this case the target value is only dependent on the fraction 
-\emph on
-currentRound/totalRounds
-\emph default
- as opposed to the fraction 
-\emph on
-numberOfConcessions/totalRounds
-\emph default
- used when evaluating incoming bids as explained above.
- The offer itself is then created by looping over all possible bids, adding
- all bids with utility higher than the lower bound to an array of acceptable
+ In this case the lower bound is the actual value returned by getTargetUtility()
+ as opposed to how the lower bound is calculated when evaluating incoming
  bids.
+ After the lower bound is set, the offer itself is created by looping over
+ all possible bids and adding all bids with utility higher than the lower
+ bound to an array of acceptable bids.
  The bid with utility higher than the lower bound and that maximizes the
- product of the agents utility multiplied with the average opponent utility,
- the 
+ product of the agents utility and the average opponent utility, the 
 \emph on
 maxBid
 \emph default
 , is also kept track of.
  That bid is the best bid for all parts with a utility higher than the lower
- bound for the agent itself.
+ bound.
  The average opponent utility is calculated using the function 
 \emph on
-getAverageOpponentUtility(Bid).
+getAverageOpponentUtility(Bid) 
+\emph default
+which loops over all opponent models and sums up each expected utility before
+ dividing it by the number of opponents
+\emph on
+.
  
 \emph default
 Depending on the fraction 
 \emph on
 currentRound/totalRounds
 \emph default
- the bid to offer is selected at random from the array mentioned above or
- set to the 
+ the bid to offer is with a probability either selected at random from the
+ array of acceptable bids mentioned above or set to the 
 \emph on
 maxBid
 \emph default
-, with a probability.
+.
  Whenever no acceptable bids can be found, the agent will offer the best
  possible bid it can generate.
+ Below you can see the the algorithm for selecting what bid to offer as
+ explained above:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "language=Java,basicstyle={\small},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Bid generateBid()
+\end_layout
+
+\begin_layout Plain Layout
+
+	acceptableBids = {}
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+	for each bid in possibleBids
+\end_layout
+
+\begin_layout Plain Layout
+
+		OwnUtil = Pow(U(bid),2)
+\end_layout
+
+\begin_layout Plain Layout
+
+		if OwnUtil >= targetUtility()
+\end_layout
+
+\begin_layout Plain Layout
+
+			acceptableBids <-- bid
+\end_layout
+
+\begin_layout Plain Layout
+
+			avgUtil = averageOpponentUtility(bid)
+\end_layout
+
+\begin_layout Plain Layout
+
+			if avgUtil * OwnUtil > maxAvgUtil * maxOwnUtil
+\end_layout
+
+\begin_layout Plain Layout
+
+				update max bid
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+	timeFraction = timePassed / totalTime
+\end_layout
+
+\begin_layout Plain Layout
+
+	if not maxBid
+\end_layout
+
+\begin_layout Plain Layout
+
+		return getMaxUtilityBid()
+\end_layout
+
+\begin_layout Plain Layout
+
+	else if Pow(timeFraction,2) > Random(0,1)
+\end_layout
+
+\begin_layout Plain Layout
+
+		return maxBid
+\end_layout
+
+\begin_layout Plain Layout
+
+	else
+\end_layout
+
+\begin_layout Plain Layout
+
+		return random element from acceptableBids
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
