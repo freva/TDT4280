@@ -17,12 +17,37 @@ import negotiator.utility.UtilitySpace;
  * This is your negotiation party.
  */
 public class GroupFredriksenJahren extends AbstractNegotiationParty {
+	/**
+	 * Keeps own BayesianOpponentModel for each agent
+	 */
     private HashMap<Object, BayesianOpponentModelScalable> opponentModels = new HashMap<>();
+
+	/**
+	 * Keeps a history concessions, each bit represents a point in time. 1 means conceded.
+	 */
 	private HashMap<Object, Long> concessions = new HashMap<>();
+
+	/**
+	 * Stores last bid received from every agent, used to detect non-concession behaviour
+	 */
 	private HashMap<Object, Bid> lastBids = new HashMap<>();
+
+	/**
+	 * Stores the last bid received so that it can be evaluated again when choose action is called
+	 */
     private Map.Entry<Object, Bid> lastBid;
+
+	/**
+	 * Lowest utility bid we are willing to accept
+	 */
     private static final double reservationValue = 0.6;
+
+	/**
+	 * Beta is defined in such a way that 8/9 way into the negotiation, the target value should be 0.875
+	 */
     private static final double beta = Math.log(1-(0.875-reservationValue)/(1-reservationValue)) / Math.log(8d/9);
+
+
 
     /**
      * Please keep this constructor. This is called by genius.
@@ -56,7 +81,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 
 
     /**
-     * Checks if you should accept following bid
+     * Checks if you should accept following bid.
      * @param bid bid to check
      * @return true if the bid is acceptable, false otherwise
      */
@@ -69,7 +94,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 
 	/**
 	 * All offers proposed by the other parties will be received as a message.
-	 * You can use this information to your advantage, for example to predict their utility.
+	 * Messages of Offer or Accept are passed to updateOpponentModel().
 	 *
 	 * @param sender The party that did the action.
 	 * @param action The action that party did.
@@ -87,7 +112,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 
 
 	/**
-	 * Updates opponent model after receiving a bid
+	 * Updates opponent model after receiving a bid. All messages of type Accept are considered to be concessions.
+	 * An Offer is considered a concession only if it differs from the last Offer by this agent.
 	 * @param agent the sender of the bid
 	 * @param bid the bid
 	 */
@@ -104,8 +130,9 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 			model.updateBeliefs(bid.getValue());
 
 			if(! concessions.containsKey(bid.getKey())) return;
+			//Next level bit hacks
 			long out = (concessions.get(bid.getKey())<<1) + (lastBids.get(agent).equals(bid.getValue()) && !isAccept ? 0 : 1);
-			concessions.put(agent, out & 1023);
+			concessions.put(agent, out & 1023); //Keep history of only last 10 rounds.
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,14 +173,14 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 	private Bid generateBid() {
 		double bestAvgUtil = 0, bestOwnUtil = 0, minAcceptable = getTargetUtility();
 		ArrayList<Bid> acceptableBids = new ArrayList<>();
-		Bid bestBid = null, maxUtilBid = null;
+		Bid bestBid = null, maxBid = null;
 
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
 		while(bidIterator.hasNext()) {
 			Bid thisBid = bidIterator.next();
 			double thisOwnUtil = Math.pow(getUtility(thisBid), 2);
 
-			if(getUtility(maxUtilBid) < getUtility(thisBid)) maxUtilBid = thisBid;
+			if(getUtility(maxBid) < getUtility(thisBid)) maxBid = thisBid;
 			if(thisOwnUtil >= minAcceptable) {
 				acceptableBids.add(thisBid);
 				double thisAvgUtil = getAverageOpponentUtility(thisBid);
@@ -165,7 +192,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
 			}
 		}
 
-		if(bestBid == null) return maxUtilBid;
+		if(bestBid == null) return maxBid;
 		else if(1 - Math.pow(timeline.getCurrentTime()/timeline.getTotalTime(), 2) < Math.random()) return bestBid;
 		else return acceptableBids.get((int) (Math.random() * acceptableBids.size()));
     }
