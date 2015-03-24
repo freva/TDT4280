@@ -92,7 +92,7 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return true if the bid is acceptable, false otherwise
      */
     private boolean shouldAccept(Map.Entry<Object, Bid> bid){
-		if(timeline.getCurrentTime() == timeline.getTotalTime()-1) return true;
+		if(timeline.getCurrentTime() >= timeline.getTotalTime()-1) return true;
 		double concessionRate = (1-getTargetUtility())/historySize;
 
 		return getUtility(bid.getValue()) >= 1 - concessionRate*Long.bitCount(concessions.get(bid.getKey()));
