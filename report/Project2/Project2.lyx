@@ -464,7 +464,7 @@ Conclusion
 \begin_layout Standard
 Our agent performed significantly better against the other agents, in the
  end our offer was accepted at our max utility.
- However, results against ourself were terrible.
+ However, results against ourselves were terrible.
  As can be seen from the graph, our target utility drops very slowly, after
  
 \begin_inset Formula $\frac{2}{3}$
@@ -868,7 +868,7 @@ name "sub:Choosing-Which-Bid"
 \begin_layout Standard
 Depending on the fraction 
 \emph on
-currentRound/totalRounds
+currentTime/totalTime
 \emph default
  the bid to offer is with a probability either selected at random from the
  array of acceptable bids mentioned above or set to the 
@@ -877,7 +877,11 @@ bestBid
 \emph default
 .
  Whenever no acceptable bids can be found, the agent will offer the best
- possible bid it can generate, the maxBid.
+ possible bid it can generate, the 
+\emph on
+maxBid
+\emph default
+.
  In algorithm 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -1039,7 +1043,7 @@ name "sub:Updating-the-Opponents-Model"
 \begin_layout Standard
 Each time our agent receives a message, it makes sure that the senders model
  is updated.
- This both when receving a new offer and when receiving a acceptance message.
+ This both when receiving a new offer and when receiving a acceptance message.
  When the agent receives a new offer it calls the function 
 \emph on
 updateOpponentModel(sender, bid)
@@ -1275,6 +1279,151 @@ for all other agents.
 Analysis
 \end_layout
 
+\begin_layout Paragraph
+Individual utility gained
+\end_layout
+
+\begin_layout Standard
+for our agent is very high.
+ The standard deviation is also very low compared to the other two agents
+ which means our results are consistently high.
+\end_layout
+
+\begin_layout Paragraph
+Fairness
+\end_layout
+
+\begin_layout Standard
+can be measured through social welfare.
+ For the party domain it is 2.14, which means that the average utility in
+ party domain is 
+\begin_inset Formula $\frac{2.14}{3}=0.71$
+\end_inset
+
+, and it is even higher for university domain.
+ This means than on average, everyone is happy.
+ However, there is a noticeable inequality, the standard deviation between
+ the average utility of the agents is 0.20.
+ This is because our agent's main goal is to be the best and competitive
+ while fairness is only it's secondary priority.
+\end_layout
+
+\begin_layout Paragraph
+Optimality
+\end_layout
+
+\begin_layout Standard
+is difficult to get for this type of problem because of the unknown preferences
+ of the opponents.
+\series bold
+
+\begin_inset Newline newline
+\end_inset
+
+Pareto
+\series default
+ optimality is guaranteed if the opponent model is accurate.
+\end_layout
+
+\begin_layout Subparagraph
+Proof: 
+\end_layout
+
+\begin_layout Standard
+Assume 
+\emph on
+bestBid
+\emph default
+ has personal utility, 
+\begin_inset Formula $pu$
+\end_inset
+
+, and average opponent utility, 
+\begin_inset Formula $\bar{ou}$
+\end_inset
+
+.
+ If 
+\emph on
+bestBid
+\emph default
+ is not pareto optimal, that means that there exists another bid, 
+\begin_inset Formula $B_{2}$
+\end_inset
+
+, such that 
+\begin_inset Formula $pu_{2}\geq pu$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{ou_{2}}\geq\bar{ou}$
+\end_inset
+
+.
+ However, this means that 
+\begin_inset Formula $pu_{2}*\bar{ou_{2}}\geq pu*\bar{ou}$
+\end_inset
+
+ in which case algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:The-algorithm-for"
+
+\end_inset
+
+
+\emph on
+ 
+\emph default
+would select 
+\emph on
+
+\begin_inset Formula $B_{2}$
+\end_inset
+
+
+\emph default
+, so that 
+\begin_inset Formula $bestBid=B_{2}$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\series bold
+Nash
+\series default
+ optimality is impossible with different preferences, because at each round,
+ the other agent would be better off playing it's maximum utility bid.
+\end_layout
+
+\begin_layout Paragraph
+Results
+\end_layout
+
+\begin_layout Standard
+in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Experimental-test-results"
+
+\end_inset
+
+ do not accurately describe the strength of the agent as both of the opponent
+ strategies, Boulware and Conceder, are very predictable and could easily
+ be beaten by a strategy that constantly bids it's maximum utility bid.
+ However, this strategy would never reach agreement against more sophisticated
+ agents.
+ We have tried to create a balanced strategy and verified it by playing
+ against our selves.
+\end_layout
+
 \begin_layout Section
 Conclusion
 \end_layout
@@ -1298,7 +1447,7 @@ Solving one problem would sometimes lead to new problems arising.
 \begin_inset Formula $\beta$
 \end_inset
 
- value yields better performane against other agents, but increases the
+ value yields better performance against other agents, but increases the
  risk of not coming to an agreement when negotiating with similar agents.
  
 \end_layout
@@ -1325,8 +1474,16 @@ In order to use our agent in a real-life negotiation, one would only have
  to define the cost and preferences of the issues in the specific domain
  in an XML file.
  In theory one could instantly start using our agent by starting it up against
- UI Party and whenever you get a response from your opponent you would enter
- their response into the GUI of the UI Party agent.
+ 
+\emph on
+UI Party
+\emph default
+ and whenever you get a response from your opponent you would enter their
+ response into the GUI of the 
+\emph on
+UI Party
+\emph default
+ agent.
  The output you would get from our agent, meaning the bid our agent selects,
  is what you should reply back.
  
