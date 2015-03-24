@@ -332,7 +332,7 @@ give in
 
  is more even.
  Before this change, in the last five rounds our target value dropped from
- 0.6 to 0, whereas now we drops only from 0.6488 to 0.6 The new target utility
+ 0.6 to 0, whereas now it drops only from 0.6488 to 0.6 The new target utility
  function is shown in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -475,8 +475,8 @@ Our agent performed significantly better against the other agents, in the
 \end_inset
 
 , so all this time we just suggest our max utility bid over and over again.
- This means that the other agents wont detect any concession and thus will
- not accept opponents bid.
+ This means that the other agents wont detect any concessions and thus will
+ not accept opponent's bid.
  Another problem is that because the agent sent the same bid over and over
  again, the others didn't have much of an opportunity to learn about its
  preferences, so at the end, while they were ready to concede, they didn't
@@ -539,9 +539,19 @@ Bid generation
 Inspired by simulated annealing algorithm, we implemented a version of temperatu
 re and randomness to our bid generation.
  Early on, we are more likely to offer a bid chosen randomly amongst the
- bid that are greater than our target value at this stage, but towards the
- end, we are more likely to offer bid that we believe is the best for us
- and the others (as described in section 
+ bid that are greater than our 
+\emph on
+target value
+\emph default
+ (section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Calculation-of-Target-Value"
+
+\end_inset
+
+) at this stage, but towards the end, we are more likely to offer bid that
+ we believe is the best for us and the others (as described in section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:Choosing-Which-Bid"
@@ -570,13 +580,20 @@ Negotiation Strategy
 The negotiation strategy we have implemented both focuses on coming to an
  agreement, as well as doing as good as possible for ourselves.
  The strategy consists of four main parts: calculating the target value,
- evaluating incoming bids, generating new bids and updating the models of
- the opponents.
+ updating the models of the opponents, evaluating incoming bids and generating
+ new bids.
  All four will be explained in the following sections.
 \end_layout
 
 \begin_layout Subsection
 Calculation of Target Value
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Calculation-of-Target-Value"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -602,12 +619,12 @@ currentTime
 reservationValue
 \emph default
  is of course the value that is the minimum value that our agent will ever
- accept.
+ (unless it is the last round) accept.
  
 \emph on
 currentTime
 \emph default
- is the current round number the negotiation process is currently on, and
+ is the current round/second the negotiation process is currently on, and
  lastly we have the 
 \begin_inset Formula $\beta$
 \end_inset
@@ -620,6 +637,116 @@ currentTime
 \begin_inset Formula 
 \begin{eqnarray*}
 targetValue & = & reservationValue+(1-reservationValue)*(1-(\frac{currentTime}{totalTime})^{\beta})
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Updating the Model of the Opponents
+\end_layout
+
+\begin_layout Subsubsection
+Updating the Opponents Utility Model
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Updating-the-Opponents-Model"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each time our agent receives a message, it makes sure that the senders model
+ is updated.
+ This both when receiving a new offer and when receiving a acceptance message.
+ When the agent receives a new offer it calls the function 
+\emph on
+updateOpponentModel(sender, bid)
+\emph default
+, where the 
+\emph on
+sender
+\emph default
+ is the opponent to update and the 
+\emph on
+bid
+\emph default
+ is the senders new offer.
+ The model of the 
+\emph on
+sender
+\emph default
+ is then updated by calling the built in method 
+\emph on
+updateBeliefs(bid)
+\emph default
+.
+ When the agent receives an acceptance message on the other hand, the bid
+ in 
+\emph on
+updateOpponentModel(sender, bid)
+\emph default
+ is not the senders new offer, but the last bid that has been made by any
+ opponent.
+ The reason why the agent chooses to update the sender model with the last
+ bid, is that although the bid does not come from the sender, the bid is
+ an offer the sender would accept, meaning that the bid might be just as
+ good for updating the model as a bid coming directly from the sender.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Updating Number of Concessions
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Updating-Number-of"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As well as updating the model of the opponents utilities, the agent uses
+ the incoming messages to update the number of times the sender has conceded
+ the last rounds.
+ To concede in our implementation means to either send an acceptance message
+ or to send a new offer different than the previous offer.
+ The reasoning behind this is that we want to reduce our acceptance level
+ to opponents that either accepts a lot of offers or tries to offer new
+ offers to come to an agreement.
+ Opponents that keeps offering the same bid over and over, will on the other
+ hand get 
+\begin_inset Quotes eld
+\end_inset
+
+punished
+\begin_inset Quotes erd
+\end_inset
+
+, by a much higher acceptance level.
+ To be able to come to an agreement with agents like ours, with a high target
+ value for a long time, we only keep track of the concessions within the
+ 
+\emph on
+n 
+\emph default
+most recent rounds.
+ This 
+\emph on
+n 
+\emph default
+is calculated as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+n & = & \lceil totalTime*0.05\rceil
 \end{eqnarray*}
 
 \end_inset
@@ -641,13 +768,13 @@ name "sub:Evaluating-Incoming-Bids"
 \begin_layout Standard
 Whenever a new bid is received, the agent first updates the model it has
  of the bidder with the new bid.
- Then when it's asked to 
+ When it's asked to 
 \emph on
 chooseAction()
 \emph default
  it needs to evaluate how good the incoming bid is and if it's willing to
  accept it.
- The function called 
+ The function 
 \emph on
 shouldAccept() 
 \emph default
@@ -658,7 +785,15 @@ reference "sec:Methods"
 
 \end_inset
 
-, returns true if the agent should accept the offer and false otherwise.
+, returns 
+\emph on
+true
+\emph default
+ if the agent should accept the offer and 
+\emph on
+false
+\emph default
+ otherwise.
  To determine this, the agent first calculates a 
 \emph on
 concessionRate
@@ -758,8 +893,14 @@ n
  more often.
  Opponents that rely on other players to reduce its acceptance level, will
  have to change strategy in order to come to an agreement at all.
- If the utility of the incoming bid is higher or equal to the lower bound
- or we have reached the last round, the agent will accept it.
+ If the utility of the incoming bid is higher or equal to the lower bound,
+ the agent will accept it.
+\end_layout
+
+\begin_layout Standard
+We also automatically accept the bid if it is the final round regardless
+ of its utility.
+ This is because any deal is better than no deal.
 \end_layout
 
 \begin_layout Subsection
@@ -795,7 +936,7 @@ getTargetUtility()
  bids.
  After the lower bound is set, the offer itself is created by looping over
  all possible bids and adding all bids with utility higher than the lower
- bound to an array of acceptable bids.
+ bound to a list of acceptable bids.
  
 \end_layout
 
@@ -819,7 +960,7 @@ The bid with utility higher than the lower bound and that maximizes the
 bestBid
 \emph default
 , is also kept track of.
- That bid is the best bid for all parts with a utility higher than the lower
+ This is the best bid for all parts with a utility higher than the lower
  bound.
  The average opponent utility is calculated using the function 
 \emph on
@@ -847,7 +988,7 @@ maxBid,
 \emph on
 maxBid 
 \emph default
-is calculated using the built in function 
+is calculated same way as the built in function 
 \emph on
 getMaxUtilityBid()
 \emph default
@@ -924,7 +1065,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-		ownUtil = Pow(U(bid), 2)
+		ownUtil = U(bid)
 \end_layout
 
 \begin_layout Plain Layout
@@ -944,7 +1085,7 @@ Bid generateBid()
 
 \begin_layout Plain Layout
 
-			if avgUtil * ownUtil > maxAvgUtil * maxOwnUtil
+			if avgUtil * ownUtil > bestAvgUtil * bestOwnUtil
 \end_layout
 
 \begin_layout Plain Layout
@@ -1025,115 +1166,6 @@ name "alg:The-algorithm-for"
 
 \end_layout
 
-\begin_layout Subsection
-Updating the Model of the Opponents
-\end_layout
-
-\begin_layout Subsubsection
-Updating the Opponents Utility Model
-\begin_inset CommandInset label
-LatexCommand label
-name "sub:Updating-the-Opponents-Model"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Each time our agent receives a message, it makes sure that the senders model
- is updated.
- This both when receiving a new offer and when receiving a acceptance message.
- When the agent receives a new offer it calls the function 
-\emph on
-updateOpponentModel(sender, bid)
-\emph default
-, where the 
-\emph on
-sender
-\emph default
- is the opponent to update and the 
-\emph on
-bid
-\emph default
- is the senders new offer.
- The model of the 
-\emph on
-sender
-\emph default
- is then updated by calling the built in method 
-\emph on
-updateBeliefs(bid)
-\emph default
-.
- When the agent receives a acceptance message on the other hand, the bid
- in 
-\emph on
-updateOpponentModel(sender, bid)
-\emph default
- is not the senders new offer, but the last bid that has been made by any
- opponent.
- The reason why the agent chooses to update the sender model with the last
- bid, is that although the bid does not come from the sender, the bid is
- an offer the sender would accept, meaning that the bid might be just as
- good for updating the model as a bid coming directly from the sender.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Updating Number of Concessions
-\begin_inset CommandInset label
-LatexCommand label
-name "sub:Updating-Number-of"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-As well as updating the model of the opponents utilities, the agent uses
- the incoming messages to update the number of times the sender has conceded
- the last rounds.
- To concede in our implementation means to either send an acceptance message
- or to send a new offer different than the previous offer.
- The reasoning behind this is that we want to reduce our acceptance level
- to opponents that either accepts a lot of offers or tries to offer new
- offers to come to an agreement.
- Opponents that keeps offering the same bid over and over, will on the other
- hand get 
-\begin_inset Quotes eld
-\end_inset
-
-punished
-\begin_inset Quotes erd
-\end_inset
-
-, by a much higher acceptance level.
- To be able to come to an agreement with agents like ours with a high target
- value for a long time, we only keep track of the 
-\emph on
-n 
-\emph default
-most recent concessions.
- This 
-\emph on
-n 
-\emph default
-is calculated as follows:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-n & = & \lceil totalTime*0.05\rceil
-\end{eqnarray*}
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section
 Methods
 \begin_inset CommandInset label
@@ -1159,7 +1191,11 @@ chooseAction()
 \emph on
 shouldAccept() 
 \emph default
-returns true, the agent accepts the offer.
+returns 
+\emph on
+true
+\emph default
+, the agent accepts the offer.
  Otherwise it generates own offer using 
 \emph on
 generateBid()
@@ -1172,11 +1208,19 @@ generateBid()
 \emph on
 shouldAccept(bid)
 \emph default
-: Returns true if the agent should accept 
+: Returns 
+\emph on
+true
+\emph default
+ if the agent should accept 
 \emph on
 bid
 \emph default
-, false otherwise (See section 
+, 
+\emph on
+false
+\emph default
+ otherwise (See section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:Evaluating-Incoming-Bids"
@@ -1300,10 +1344,10 @@ can be measured through social welfare.
 \begin_inset Formula $\frac{2.14}{3}=0.71$
 \end_inset
 
-, and it is even higher for university domain.
+, and it is even higher for the university domain.
  This means than on average, everyone is happy.
  However, there is a noticeable inequality, the standard deviation between
- the average utility of the agents is 0.20.
+ the average utilities of the agents is 0.20.
  This is because our agent's main goal is to be the best and competitive
  while fairness is only it's secondary priority.
 \end_layout
@@ -1330,7 +1374,7 @@ Proof:
 \end_layout
 
 \begin_layout Standard
-Assume 
+If 
 \emph on
 bestBid
 \emph default
@@ -1343,7 +1387,7 @@ bestBid
 \end_inset
 
 .
- If 
+ Assume 
 \emph on
 bestBid
 \emph default
@@ -1443,7 +1487,7 @@ Large changes to parts of the strategy sometimes made no difference to the
 
 \begin_layout Itemize
 Solving one problem would sometimes lead to new problems arising.
- Raising the 
+ For example, raising the 
 \begin_inset Formula $\beta$
 \end_inset
 
@@ -2073,7 +2117,7 @@ Conceder
 \end_layout
 
 \begin_layout Subsubsection
-Againts itself
+Against itself
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:Experimental-test-results-Againts-itself"
@@ -2628,7 +2672,8 @@ Domain results
 
 \begin_layout Standard
 The two tables below show the average and standard deviation results of
- running tournament for ten rounds.
+ running tournament for ten rounds with our agent against a Boulware and
+ a Conceder agent.
 \end_layout
 
 \begin_layout Subsubsection
