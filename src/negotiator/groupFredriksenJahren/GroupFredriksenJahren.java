@@ -92,9 +92,9 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return true if the bid is acceptable, false otherwise
      */
     private boolean shouldAccept(Map.Entry<Object, Bid> bid){
-		if(timeline.getCurrentTime() >= timeline.getTotalTime()-1) return true;
+        double endTime = timeline.getTotalTime() - (timeline.getType().name().equals("Rounds") ? 1 : 0.2);
+        if(timeline.getCurrentTime() >= endTime) return true;
 		double concessionRate = (1-getTargetUtility())/historySize;
-
 		return getUtility(bid.getValue()) >= 1 - concessionRate*Long.bitCount(concessions.get(bid.getKey()));
     }
 
@@ -169,7 +169,8 @@ public class GroupFredriksenJahren extends AbstractNegotiationParty {
      * @return double in [reservationValue, 1]
      */
 	private double getTargetUtility() {
-		return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/(timeline.getTotalTime()-1), beta));
+        double endTime = timeline.getTotalTime() - (timeline.getType().name().equals("Rounds") ? 1 : 0.2);
+        return reservationValue + (1-reservationValue)*(1 - Math.pow(timeline.getCurrentTime()/endTime, beta));
 	}
 
 
