@@ -1272,6 +1272,10 @@ for all other agents.
 \end_layout
 
 \begin_layout Section
+Analysis
+\end_layout
+
+\begin_layout Section
 Conclusion
 \end_layout
 
@@ -2463,6 +2467,11 @@ FJ 3
 
 \begin_layout Subsection
 Domain results
+\end_layout
+
+\begin_layout Standard
+The two tables below show the average and standard deviation results of
+ running tournament for ten rounds.
 \end_layout
 
 \begin_layout Subsubsection
